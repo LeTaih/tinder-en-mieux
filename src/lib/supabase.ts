@@ -10,12 +10,14 @@ import type { Database } from '../types/database';
 // expo-secure-store ne stocke pas >2048 octets : on garde une clé AES-256 dans
 // SecureStore et on chiffre la valeur (la session) dans AsyncStorage.
 class LargeSecureStore {
-  private async _encrypt(key: string, value: string) {
+  private _encrypt(value: string) {
     const encryptionKey = crypto.getRandomValues(new Uint8Array(256 / 8));
     const cipher = new aesjs.ModeOfOperation.ctr(encryptionKey, new aesjs.Counter(1));
     const encryptedBytes = cipher.encrypt(aesjs.utils.utf8.toBytes(value));
-    await SecureStore.setItemAsync(key, aesjs.utils.hex.fromBytes(encryptionKey));
-    return aesjs.utils.hex.fromBytes(encryptedBytes);
+    return {
+      encryptionKeyHex: aesjs.utils.hex.fromBytes(encryptionKey),
+      encryptedHex: aesjs.utils.hex.fromBytes(encryptedBytes),
+    };
   }
 
   private async _decrypt(key: string, value: string) {
@@ -38,8 +40,15 @@ class LargeSecureStore {
   }
 
   async setItem(key: string, value: string) {
-    const encrypted = await this._encrypt(key, value);
-    await AsyncStorage.setItem(key, encrypted);
+    const { encryptionKeyHex, encryptedHex } = this._encrypt(value);
+    await AsyncStorage.setItem(key, encryptedHex);
+    try {
+      await SecureStore.setItemAsync(key, encryptionKeyHex);
+    } catch (e) {
+      // Évite une valeur chiffrée orpheline (indéchiffrable) si l'écriture de la clé échoue.
+      await AsyncStorage.removeItem(key);
+      throw e;
+    }
   }
 }
 
@@ -52,12 +61,4 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
     persistSession: true,
     detectSessionInUrl: false,
   },
-});
-
-import { AppState } from 'react-native';
-
-// Rafraîchit la session tant que l'app est au premier plan.
-AppState.addEventListener('change', (state) => {
-  if (state === 'active') supabase.auth.startAutoRefresh();
-  else supabase.auth.stopAutoRefresh();
 });

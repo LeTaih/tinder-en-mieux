@@ -12,6 +12,8 @@ jest.mock('../../lib/supabase', () => ({
         authCallback = cb;
         return { data: { subscription: { unsubscribe: jest.fn() } } };
       },
+      startAutoRefresh: jest.fn(),
+      stopAutoRefresh: jest.fn(),
     },
   },
 }));

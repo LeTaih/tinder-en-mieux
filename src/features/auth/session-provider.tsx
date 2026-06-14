@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { AppState } from 'react-native';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 
@@ -15,11 +16,24 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setSession(data.session);
       setLoading(false);
     });
-    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       setLoading(false);
     });
-    return () => data.subscription.unsubscribe();
+
+    // Auto-refresh de la session tant que l'app est au premier plan.
+    supabase.auth.startAutoRefresh();
+    const appStateListener = AppState.addEventListener('change', (state) => {
+      if (state === 'active') supabase.auth.startAutoRefresh();
+      else supabase.auth.stopAutoRefresh();
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+      appStateListener.remove();
+      supabase.auth.stopAutoRefresh();
+    };
   }, []);
 
   return <SessionContext.Provider value={{ session, loading }}>{children}</SessionContext.Provider>;

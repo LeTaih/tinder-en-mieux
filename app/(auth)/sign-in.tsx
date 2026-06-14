@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Button, Platform, Text, TextInput, View } from 'react-native';
 import { Link } from 'expo-router';
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -11,15 +11,17 @@ import {
   signInWithGoogleIdToken,
 } from '../../src/features/auth/auth-api';
 
-GoogleSignin.configure({
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-});
-
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID) {
+      GoogleSignin.configure({ webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID });
+    }
+  }, []);
 
   async function onEmailSubmit() {
     const found = validateCredentials(email, password);
