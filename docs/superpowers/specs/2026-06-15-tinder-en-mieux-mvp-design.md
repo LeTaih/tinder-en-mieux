@@ -47,7 +47,8 @@ qui bloquerait le scaling, sans sur-ingénierie prématurée.
 
 - **Auth** : email/mot de passe + **Apple Sign-In** + **Google Sign-In**, via Supabase Auth
   (aucune logique d'auth maison).
-- **Onboarding / profil** : nom affiché, date de naissance (18+), genre, bio.
+- **Onboarding / profil** : nom affiché, date de naissance (18+), genre (choisi dans une **liste
+  de référence configurable**, jamais figée en dur), bio.
 - **Photos** : **1 à 6**, **minimum 1 obligatoire** pour être visible, réordonnables, uploadées
   sur Supabase Storage.
 - **Préférences de découverte** : genre recherché, tranche d'âge (min/max), distance max (km).
@@ -91,8 +92,14 @@ dashboard de modération (les reports sont stockés mais non traités via UI).
 > Toutes les tables sont protégées par **RLS**. Les coordonnées précises ne sortent jamais via
 > les API ; seule une distance calculée est exposée par la RPC du deck.
 
+### `genders` (table de référence configurable)
+- `id`, `key` (slug stable), `label`, `is_active`, `sort_order`.
+- **La liste des genres n'est jamais figée dans le code ni dans un enum Postgres** : la faire
+  évoluer = insérer/désactiver une ligne, sans migration de schéma. Le front charge la liste
+  depuis cette table.
+
 ### `profiles` (1:1 avec `auth.users`)
-- `id` (uuid, FK `auth.users`), `display_name`, `birthdate` (date, 18+), `gender` (enum),
+- `id` (uuid, FK `auth.users`), `display_name`, `birthdate` (date, 18+), `gender_id` (FK `genders`),
   `bio` (text), `location` (`geography(Point)`), `last_active_at`, `created_at`.
 
 ### `profile_photos`
@@ -100,7 +107,11 @@ dashboard de modération (les reports sont stockés mais non traités via UI).
 - Au moins 1 photo requise pour qu'un profil soit servi dans le deck.
 
 ### `preferences`
-- `profile_id` (PK, FK), `seeking_gender`, `age_min`, `age_max`, `max_distance_km`.
+- `profile_id` (PK, FK), `age_min`, `age_max`, `max_distance_km`.
+
+### `preference_genders` (genres recherchés, M:N)
+- `profile_id` (FK), `gender_id` (FK `genders`). PK composite.
+- Permet de chercher plusieurs genres sans enum ni colonne figée.
 
 ### `swipes`
 - `id`, `swiper_id` (FK), `swipee_id` (FK), `direction` (enum `like`/`pass`), `created_at`.
@@ -143,7 +154,8 @@ dashboard de modération (les reports sont stockés mais non traités via UI).
   mon rayon (`ST_DWithin`), **filtrage bidirectionnel léger** (l'autre me cherche aussi), hors
   profils déjà swipés, hors moi-même, **hors paires bloquées (dans les deux sens)**, triés par
   proximité, paginés en curseur. Renvoie une **distance**, jamais les coordonnées.
-- **Quota likes/jour** : compté depuis `swipes` (requête indexée), seuil configurable.
+- **Quota likes/jour** : compté depuis `swipes` (requête indexée). **Défaut : 20/jour**, valeur
+  **configurable** (param serveur), non figée dans le code.
 - **Rewind** : suppression du dernier swipe → le profil réapparaît dans le deck.
 - **Block** : exclusion bidirectionnelle du deck + fin immédiate de tout match actif entre les
   deux (passage en archivé/verrouillé).
