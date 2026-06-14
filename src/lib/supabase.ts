@@ -53,3 +53,11 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
     detectSessionInUrl: false,
   },
 });
+
+import { AppState } from 'react-native';
+
+// Rafraîchit la session tant que l'app est au premier plan.
+AppState.addEventListener('change', (state) => {
+  if (state === 'active') supabase.auth.startAutoRefresh();
+  else supabase.auth.stopAutoRefresh();
+});
