@@ -63,6 +63,90 @@ export type Database = {
         }
         Relationships: []
       }
+      matches: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          last_message_at: string | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          last_message_at?: string | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_message_at?: string | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          image_path: string | null
+          match_id: string
+          sender_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          match_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          image_path?: string | null
+          match_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       preference_genders: {
         Row: {
           gender_id: string
@@ -196,22 +280,81 @@ export type Database = {
         ]
       }
       swipes: {
-        Row: { id: string; swiper_id: string; swipee_id: string; direction: string; created_at: string };
-        Insert: { id?: string; swiper_id: string; swipee_id: string; direction: string; created_at?: string };
-        Update: { id?: string; swiper_id?: string; swipee_id?: string; direction?: string; created_at?: string };
-        Relationships: [];
-      };
-      matches: {
-        Row: { id: string; user_a: string; user_b: string; created_at: string; expires_at: string };
-        Insert: { id?: string; user_a: string; user_b: string; created_at?: string; expires_at: string };
-        Update: { id?: string; user_a?: string; user_b?: string; created_at?: string; expires_at?: string };
-        Relationships: [];
-      };
+        Row: {
+          created_at: string
+          direction: string
+          id: string
+          swipee_id: string
+          swiper_id: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          id?: string
+          swipee_id: string
+          swiper_id: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          id?: string
+          swipee_id?: string
+          swiper_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swipes_swipee_id_fkey"
+            columns: ["swipee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swipes_swiper_id_fkey"
+            columns: ["swiper_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      deck_candidates: {
+        Args: { p_limit?: number; p_offset?: number; p_user: string }
+        Returns: {
+          age: number
+          bio: string
+          display_name: string
+          distance_km: number
+          id: string
+          photo_paths: string[]
+        }[]
+      }
+      likes_remaining_today: { Args: never; Returns: number }
+      my_matches: {
+        Args: { p_user: string }
+        Returns: {
+          display_name: string
+          expires_at: string
+          is_active: boolean
+          match_id: string
+          other_id: string
+          photo_path: string
+        }[]
+      }
+      record_swipe: {
+        Args: { p_direction: string; p_target: string }
+        Returns: Json
+      }
+      rewind_last_swipe: { Args: never; Returns: string }
+      send_message: {
+        Args: { p_body: string | null; p_image_path: string | null; p_match_id: string }
+        Returns: Json
+      }
       set_my_location: {
         Args: { lat: number; lng: number }
         Returns: undefined
@@ -225,18 +368,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      record_swipe: {
-        Args: { p_target: string; p_direction: string };
-        Returns: { likes_remaining: number; matched: boolean; match_id: string | null };
-      };
-      rewind_last_swipe: {
-        Args: Record<string, never>;
-        Returns: string;
-      };
-      likes_remaining_today: {
-        Args: Record<string, never>;
-        Returns: number;
-      };
     }
     Enums: {
       [_ in never]: never
