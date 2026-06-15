@@ -69,6 +69,7 @@ export type Database = {
           expires_at: string
           id: string
           last_message_at: string | null
+          notified_expiring: boolean
           user_a: string
           user_b: string
         }
@@ -77,6 +78,7 @@ export type Database = {
           expires_at: string
           id?: string
           last_message_at?: string | null
+          notified_expiring?: boolean
           user_a: string
           user_b: string
         }
@@ -85,6 +87,7 @@ export type Database = {
           expires_at?: string
           id?: string
           last_message_at?: string | null
+          notified_expiring?: boolean
           user_a?: string
           user_b?: string
         }
@@ -279,6 +282,35 @@ export type Database = {
           },
         ]
       }
+      push_tokens: {
+        Row: {
+          platform: string | null
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          platform?: string | null
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          platform?: string | null
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       swipes: {
         Row: {
           created_at: string
@@ -318,11 +350,35 @@ export type Database = {
           },
         ]
       }
+      user_notification_state: {
+        Row: {
+          badge_count: number
+          user_id: string
+        }
+        Insert: {
+          badge_count?: number
+          user_id: string
+        }
+        Update: {
+          badge_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      clear_badge: { Args: never; Returns: undefined }
       deck_candidates: {
         Args: { p_limit?: number; p_offset?: number; p_user: string }
         Returns: {
