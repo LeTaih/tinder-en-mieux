@@ -27,6 +27,7 @@ Issu d'un audit en 4 zones (auth/onboarding, deck, matchs/chat, transverse) dont
 - **Icônes d'onglets** (Deck / Matchs / Profil).
 - **SafeArea + StatusBar** au niveau racine.
 - **Carrousel photo** : indicateur multi-photos + lisibilité du texte en surimpression.
+- **Clavier du chat** : le clavier ne doit plus recouvrir les messages ni la barre de saisie.
 - **Feedback de press** (opacité) sur les éléments tappables sans retour visuel.
 
 ### Hors périmètre
@@ -70,24 +71,31 @@ Issu d'un audit en 4 zones (auth/onboarding, deck, matchs/chat, transverse) dont
 5. **Accessibilité** : `accessibilityLabel` + `accessibilityRole="button"` sur les boutons-icônes :
    `DeckCard` (↩️ « Revenir », ✕ « Passer », ♥ « Aimer »), `ChatInput` (📎 « Joindre une image »,
    ➤ « Envoyer »), boutons photos.
+6. **Clavier du chat** (`app/match/[id].tsx`) : aujourd'hui le clavier **recouvre les messages et la
+   barre de saisie** (le `KeyboardAvoidingView` n'enveloppe que `ChatInput`, et `behavior` est `undefined`
+   sur Android → pas d'évitement). Fix : englober **toute la zone** (FlatList + `ChatInput`) dans un seul
+   `KeyboardAvoidingView`, `behavior="padding"` (iOS) / `"height"` (Android), avec
+   `keyboardVerticalOffset` = hauteur de l'en-tête de navigation (`useHeaderHeight()` de
+   `@react-navigation/elements`). La FlatList `inverted` garde les derniers messages visibles au-dessus
+   de la saisie.
 
 ### P1 — cohérence & robustesse
-6. **Thème** : créer `src/lib/theme.ts`. Remplacer les hex récurrents — `#208AEF` (primaire, ~9 fichiers),
+7. **Thème** : créer `src/lib/theme.ts`. Remplacer les hex récurrents — `#208AEF` (primaire, ~9 fichiers),
    `#ccc`/`#ddd` (bordures), `#999`/`#777` (textes secondaires), `#E53935` (alerte), `#E9E9EB` (bulle),
    `#E6F0FF` (fond sélection), `#f2f2f2`/`#eee` (fonds) — par `Colors.*`. Espacements (`8/12/16/24`) et
    radii (`8/12/16`) via `Spacing`/`Radii` là où c'est direct.
-7. **États** : `EmptyState` réutilisable. L'appliquer à : deck vide & erreur (`app/(tabs)/index.tsx`),
+8. **États** : `EmptyState` réutilisable. L'appliquer à : deck vide & erreur (`app/(tabs)/index.tsx`),
    matchs vides (`app/(tabs)/matches.tsx`), **chat vide** (`ListEmptyComponent` dans `app/match/[id].tsx`
    → « Aucun message. Lance la conversation ! »), liste des genres en chargement
    (`app/(onboarding)/gender.tsx` → spinner). Profil sans photo (`app/(tabs)/profile.tsx`) → message.
-8. **SafeArea + StatusBar** : `app/_layout.tsx` — `SafeAreaProvider` autour du `RootNavigator`,
+9. **SafeArea + StatusBar** : `app/_layout.tsx` — `SafeAreaProvider` autour du `RootNavigator`,
    `<StatusBar style="dark" />` ; `SafeAreaView` sur les conteneurs auth/onboarding/chargement.
-9. **Carrousel photo** (`src/features/deck/DeckCard.tsx`) : indicateur de position (points ou « 1/3 »),
+10. **Carrousel photo** (`src/features/deck/DeckCard.tsx`) : indicateur de position (points ou « 1/3 »),
    cas 0 photo (placeholder explicite, pas un carré gris « cassé ») et 1 photo (pas de cyclage), légère
    ombre/dégradé derrière le texte (prénom/âge/bio) pour la lisibilité sur photo claire.
 
 ### P2 — confort (si trivial)
-10. **Feedback de press** : opacité au press sur les lignes de matchs (`matches.tsx`) et les boutons de
+11. **Feedback de press** : opacité au press sur les lignes de matchs (`matches.tsx`) et les boutons de
     sélection (genre/préférences) via `style={({ pressed }) => …}`.
 
 ## 5. Architecture des fichiers
@@ -103,7 +111,7 @@ Issu d'un audit en 4 zones (auth/onboarding, deck, matchs/chat, transverse) dont
 - `app/_layout.tsx` (SafeArea + StatusBar), `app/(tabs)/_layout.tsx` (icônes).
 - `app/(auth)/*`, `app/(onboarding)/*` (AppButton, ErrorText, SafeAreaView, thème).
 - `app/(tabs)/index.tsx`, `app/(tabs)/matches.tsx`, `app/(tabs)/profile.tsx`, `app/match/[id].tsx`
-  (EmptyState, thème, a11y, états).
+  (EmptyState, thème, a11y, états, **clavier**).
 - `src/features/deck/DeckCard.tsx` (a11y, carrousel, thème), `src/features/chat/*` (a11y, thème, chat
   vide), `src/features/matches/countdown.ts` (padding), `MatchModal.tsx`/`SafetyMenu.tsx` (tu).
 
@@ -118,7 +126,8 @@ Issu d'un audit en 4 zones (auth/onboarding, deck, matchs/chat, transverse) dont
 - **Non-régression** : toute la suite existante (49 tests) doit rester verte ; les tests qui rendent des
   écrans modifiés (deck-card, match-modal, identity/preferences) ne doivent pas casser (mocker
   `@expo/vector-icons` localement si besoin, comme on a isolé `SafetyMenu`).
-- Rendu visuel / SafeArea / icônes : vérifiés **sur device** (le polish visuel ne se teste pas en unitaire).
+- Rendu visuel / SafeArea / icônes / **clavier du chat** : vérifiés **sur device** (le comportement du
+  clavier et le polish visuel ne se testent pas en unitaire — validation manuelle sur le nouveau build).
 
 ## 7. Risques & points d'attention
 
