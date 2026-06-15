@@ -118,3 +118,105 @@ end;
 $$;
 revoke execute on function public.set_my_prompts(uuid[], text[]) from public;
 grant execute on function public.set_my_prompts(uuid[], text[]) to authenticated;
+
+-- ============ deck_candidates : + champs riches (conserve filtres swipes + blocage) ============
+drop function if exists public.deck_candidates(uuid, int, int);
+create function public.deck_candidates(p_user uuid, p_limit int default 10, p_offset int default 0)
+returns table (
+  id uuid, display_name text, age int, distance_km int, bio text, photo_paths text[],
+  job text, education text, height_cm int, interests text[], prompts jsonb
+)
+language sql security definer set search_path = public, extensions as $$
+  with me as (
+    select pr.id, pr.gender_id, pr.birthdate, pr.location,
+           prefs.age_min, prefs.age_max, prefs.max_distance_km
+    from public.profiles pr
+    join public.preferences prefs on prefs.profile_id = pr.id
+    where pr.id = p_user
+  )
+  select
+    c.id,
+    c.display_name,
+    date_part('year', age(c.birthdate))::int as age,
+    round(extensions.st_distance(me.location, c.location) / 1000.0)::int as distance_km,
+    c.bio,
+    array(
+      select pp.storage_path from public.profile_photos pp
+      where pp.profile_id = c.id order by pp.position
+    ) as photo_paths,
+    c.job, c.education, c.height_cm,
+    array(
+      select i.label from public.profile_interests pi
+      join public.interests i on i.id = pi.interest_id
+      where pi.profile_id = c.id order by i.sort_order
+    ) as interests,
+    coalesce((
+      select jsonb_agg(jsonb_build_object('question', pr.question, 'answer', ppr.answer) order by ppr.position)
+      from public.profile_prompts ppr join public.prompts pr on pr.id = ppr.prompt_id
+      where ppr.profile_id = c.id
+    ), '[]'::jsonb) as prompts
+  from me, public.profiles c
+  join public.preferences cp on cp.profile_id = c.id
+  where c.id <> me.id
+    and c.location is not null
+    and exists (select 1 from public.profile_photos pp where pp.profile_id = c.id)
+    and c.gender_id in (select gender_id from public.preference_genders where profile_id = me.id)
+    and date_part('year', age(c.birthdate))::int between me.age_min and me.age_max
+    and extensions.st_dwithin(me.location, c.location, me.max_distance_km * 1000)
+    and me.gender_id in (select gender_id from public.preference_genders where profile_id = c.id)
+    and date_part('year', age(me.birthdate))::int between cp.age_min and cp.age_max
+    and not exists (select 1 from public.swipes s where s.swiper_id = me.id and s.swipee_id = c.id)
+    and not exists (
+      select 1 from public.blocks b
+      where (b.blocker_id = me.id and b.blocked_id = c.id)
+         or (b.blocker_id = c.id and b.blocked_id = me.id)
+    )
+  order by extensions.st_distance(me.location, c.location) asc
+  limit p_limit offset p_offset;
+$$;
+revoke execute on function public.deck_candidates(uuid, int, int) from public, authenticated;
+grant execute on function public.deck_candidates(uuid, int, int) to service_role;
+
+-- ============ my_matches : + champs riches + toutes les photos (conserve filtre blocage) ============
+drop function if exists public.my_matches(uuid);
+create function public.my_matches(p_user uuid)
+returns table (
+  match_id uuid, other_id uuid, display_name text, photo_path text, photo_paths text[],
+  expires_at timestamptz, is_active boolean,
+  job text, education text, height_cm int, interests text[], prompts jsonb
+)
+language sql security definer set search_path = public as $$
+  select
+    m.id as match_id,
+    other.id as other_id,
+    other.display_name,
+    (select pp.storage_path from public.profile_photos pp
+       where pp.profile_id = other.id order by pp.position limit 1) as photo_path,
+    array(select pp.storage_path from public.profile_photos pp
+       where pp.profile_id = other.id order by pp.position) as photo_paths,
+    m.expires_at,
+    (m.expires_at > now()) as is_active,
+    other.job, other.education, other.height_cm,
+    array(
+      select i.label from public.profile_interests pi
+      join public.interests i on i.id = pi.interest_id
+      where pi.profile_id = other.id order by i.sort_order
+    ) as interests,
+    coalesce((
+      select jsonb_agg(jsonb_build_object('question', pr.question, 'answer', ppr.answer) order by ppr.position)
+      from public.profile_prompts ppr join public.prompts pr on pr.id = ppr.prompt_id
+      where ppr.profile_id = other.id
+    ), '[]'::jsonb) as prompts
+  from public.matches m
+  join public.profiles other
+    on other.id = case when m.user_a = p_user then m.user_b else m.user_a end
+  where (m.user_a = p_user or m.user_b = p_user)
+    and not exists (
+      select 1 from public.blocks b
+      where (b.blocker_id = p_user and b.blocked_id = other.id)
+         or (b.blocker_id = other.id and b.blocked_id = p_user)
+    )
+  order by m.expires_at desc;
+$$;
+revoke execute on function public.my_matches(uuid) from public, authenticated;
+grant execute on function public.my_matches(uuid) to service_role;
