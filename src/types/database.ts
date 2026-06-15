@@ -201,6 +201,12 @@ export type Database = {
         Update: { id?: string; swiper_id?: string; swipee_id?: string; direction?: string; created_at?: string };
         Relationships: [];
       };
+      matches: {
+        Row: { id: string; user_a: string; user_b: string; created_at: string; expires_at: string };
+        Insert: { id?: string; user_a: string; user_b: string; created_at?: string; expires_at: string };
+        Update: { id?: string; user_a?: string; user_b?: string; created_at?: string; expires_at?: string };
+        Relationships: [];
+      };
     }
     Views: {
       [_ in never]: never
@@ -221,7 +227,7 @@ export type Database = {
       }
       record_swipe: {
         Args: { p_target: string; p_direction: string };
-        Returns: number;
+        Returns: { likes_remaining: number; matched: boolean; match_id: string | null };
       };
       rewind_last_swipe: {
         Args: Record<string, never>;
