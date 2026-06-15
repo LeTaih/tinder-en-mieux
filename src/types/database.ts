@@ -352,7 +352,7 @@ export type Database = {
       }
       rewind_last_swipe: { Args: never; Returns: string }
       send_message: {
-        Args: { p_body: string | null; p_image_path: string | null; p_match_id: string }
+        Args: { p_body: string; p_image_path: string; p_match_id: string }
         Returns: Json
       }
       set_my_location: {

@@ -8,6 +8,17 @@ declare const atob: (s: string) => string;
 
 const CHAT_BUCKET = 'chat-media';
 
+// send_message accepte null pour le champ inutilisé (texte XOR image), mais les types
+// regénérés par `npm run db:types` typent p_body/p_image_path en `string` non-null.
+// Cast localisé ici pour rester robuste aux régénérations.
+function sendMessageArgs(matchId: string, body: string | null, imagePath: string | null) {
+  return { p_match_id: matchId, p_body: body, p_image_path: imagePath } as {
+    p_match_id: string;
+    p_body: string;
+    p_image_path: string;
+  };
+}
+
 export async function fetchMessages(matchId: string): Promise<Message[]> {
   const { data, error } = await supabase
     .from('messages')
@@ -19,11 +30,7 @@ export async function fetchMessages(matchId: string): Promise<Message[]> {
 }
 
 export async function sendText(matchId: string, body: string): Promise<Message> {
-  const { data, error } = await supabase.rpc('send_message', {
-    p_match_id: matchId,
-    p_body: body,
-    p_image_path: null,
-  });
+  const { data, error } = await supabase.rpc('send_message', sendMessageArgs(matchId, body, null));
   if (error) throw error;
   return data as unknown as Message;
 }
@@ -39,11 +46,7 @@ export async function sendImage(matchId: string, localUri: string): Promise<Mess
   const bytes = Uint8Array.from(atob(manipulated.base64), (c) => c.charCodeAt(0));
   const up = await supabase.storage.from(CHAT_BUCKET).upload(path, bytes, { contentType: 'image/jpeg' });
   if (up.error) throw up.error;
-  const { data, error } = await supabase.rpc('send_message', {
-    p_match_id: matchId,
-    p_body: null,
-    p_image_path: path,
-  });
+  const { data, error } = await supabase.rpc('send_message', sendMessageArgs(matchId, null, path));
   if (error) throw error;
   return data as unknown as Message;
 }

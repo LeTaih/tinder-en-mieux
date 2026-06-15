@@ -5,7 +5,6 @@ import { useSession } from '../../src/features/auth/session-provider';
 import { useMatches } from '../../src/features/matches/use-matches';
 import { formatCountdown, isExpired } from '../../src/features/matches/countdown';
 import { useMessages, useSendMessage } from '../../src/features/chat/use-chat';
-import { expiresAtFromMessage } from '../../src/features/chat/chat-format';
 import { MessageBubble } from '../../src/features/chat/MessageBubble';
 import { ChatInput } from '../../src/features/chat/ChatInput';
 
@@ -29,10 +28,6 @@ export default function ChatScreen() {
     return () => clearInterval(t);
   }, []);
 
-  // expires_at vivant : dérivé du dernier message si présent, sinon celui du match.
-  const last = messages.length ? messages[messages.length - 1] : null;
-  const liveExpiresAt = last ? expiresAtFromMessage(last.created_at) : match?.expires_at ?? null;
-
   if (!match || !myId || (isLoading && messages.length === 0)) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -41,8 +36,10 @@ export default function ChatScreen() {
     );
   }
 
-  const expired = liveExpiresAt ? isExpired(liveExpiresAt, now) : true;
-  const remainingMs = liveExpiresAt ? new Date(liveExpiresAt).getTime() - now.getTime() : 0;
+  // `match.expires_at` est l'autorité serveur (bumpée en direct par use-chat à chaque message).
+  const expiresAt = match.expires_at;
+  const expired = isExpired(expiresAt, now);
+  const remainingMs = new Date(expiresAt).getTime() - now.getTime();
   const under10 = !expired && remainingMs < TEN_MIN_MS;
 
   return (
@@ -53,7 +50,7 @@ export default function ChatScreen() {
           title: match.display_name,
           headerRight: () => (
             <Text style={{ color: expired ? '#999' : under10 ? '#E53935' : '#208AEF', fontWeight: '600' }}>
-              {expired || !liveExpiresAt ? 'Expiré' : `⏳ ${formatCountdown(liveExpiresAt, now)}`}
+              {expired ? 'Expiré' : `⏳ ${formatCountdown(expiresAt, now)}`}
             </Text>
           ),
         }}
@@ -68,7 +65,9 @@ export default function ChatScreen() {
       />
       {expired ? (
         <View style={{ padding: 16, backgroundColor: '#f2f2f2' }}>
-          <Text style={{ textAlign: 'center', color: '#777' }}>Ce match a expiré.</Text>
+          <Text style={{ textAlign: 'center', color: '#777' }}>
+            Ce match a expiré — tu ne peux plus envoyer de messages.
+          </Text>
         </View>
       ) : (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

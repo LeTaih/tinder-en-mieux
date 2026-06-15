@@ -30,10 +30,12 @@ export default function Deck() {
           }
         },
         onError: (e: any) => {
-          if (typeof e?.message === 'string' && e.message.includes('QUOTA_EXCEEDED')) {
+          const raw = typeof e?.message === 'string' ? e.message : '';
+          if (raw.includes('QUOTA_EXCEEDED')) {
             Alert.alert('Quota atteint', 'Tu as utilisé tes 20 likes du jour. Reviens demain !');
           } else {
-            Alert.alert('Oups', 'Action impossible pour le moment. Réessaie.');
+            // On affiche le message réel pour faciliter le diagnostic (à durcir avant prod).
+            Alert.alert('Action impossible', raw || 'Réessaie dans un instant.');
           }
         },
       },
