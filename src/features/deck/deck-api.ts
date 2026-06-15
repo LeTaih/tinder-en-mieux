@@ -22,10 +22,12 @@ export type SwipeResult = { likesRemaining: number; matched: boolean; matchId: s
 export async function recordSwipe(target: string, direction: 'like' | 'pass'): Promise<SwipeResult> {
   const { data, error } = await supabase.rpc('record_swipe', { p_target: target, p_direction: direction });
   if (error) throw error;
+  // record_swipe est typée `Json` (générée) : on caste vers la forme renvoyée par la RPC.
+  const res = data as { likes_remaining?: number; matched?: boolean; match_id?: string | null } | null;
   return {
-    likesRemaining: data?.likes_remaining ?? 0,
-    matched: data?.matched ?? false,
-    matchId: data?.match_id ?? null,
+    likesRemaining: res?.likes_remaining ?? 0,
+    matched: res?.matched ?? false,
+    matchId: res?.match_id ?? null,
   };
 }
 
