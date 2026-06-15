@@ -3,7 +3,7 @@ import { AppState, Platform } from 'react-native';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { clearBadge, registerPushToken } from './push-api';
 import { routeForNotification, type PushData } from './notification-format';
 
@@ -45,7 +45,7 @@ export function usePushNotifications(userId: string | undefined) {
   useEffect(() => {
     function open(data: PushData | undefined) {
       const route = routeForNotification(data);
-      if (route) router.push(route as never);
+      if (route) router.push(route as Href);
     }
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
       open(response.notification.request.content.data as PushData);
@@ -60,8 +60,9 @@ export function usePushNotifications(userId: string | undefined) {
   useEffect(() => {
     if (!userId) return;
     function reset() {
-      clearBadge();
-      Notifications.setBadgeCountAsync(0);
+      // Cosmétique : un échec ne doit ni crasher ni émettre d'unhandled-rejection.
+      clearBadge().catch(() => {});
+      Notifications.setBadgeCountAsync(0).catch(() => {});
     }
     reset();
     const sub = AppState.addEventListener('change', (s) => {
