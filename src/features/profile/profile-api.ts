@@ -34,19 +34,16 @@ export async function deletePhoto(userId: string, photoId: string, storagePath: 
 }
 
 export async function upsertPreferences(
-  userId: string,
   prefs: { age_min: number; age_max: number; max_distance_km: number },
   seekingGenderIds: string[],
 ) {
-  const { error: e1 } = await supabase.from('preferences').upsert({ profile_id: userId, ...prefs });
-  if (e1) throw e1;
-  const { error: e2 } = await supabase.from('preference_genders').delete().eq('profile_id', userId);
-  if (e2) throw e2;
-  if (seekingGenderIds.length > 0) {
-    const rows = seekingGenderIds.map((gid) => ({ profile_id: userId, gender_id: gid }));
-    const { error: e3 } = await supabase.from('preference_genders').insert(rows);
-    if (e3) throw e3;
-  }
+  const { error } = await supabase.rpc('set_my_preferences', {
+    p_age_min: prefs.age_min,
+    p_age_max: prefs.age_max,
+    p_max_distance_km: prefs.max_distance_km,
+    p_gender_ids: seekingGenderIds,
+  });
+  if (error) throw error;
 }
 
 export async function setMyLocation(lng: number, lat: number) {

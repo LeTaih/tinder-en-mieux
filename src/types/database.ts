@@ -54,6 +54,10 @@ export type Database = {
         Args: { lng: number; lat: number };
         Returns: undefined;
       };
+      set_my_preferences: {
+        Args: { p_age_min: number; p_age_max: number; p_max_distance_km: number; p_gender_ids: string[] };
+        Returns: undefined;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

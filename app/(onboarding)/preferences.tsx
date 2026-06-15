@@ -37,7 +37,6 @@ export default function Preferences() {
     setBusy(true);
     try {
       await upsertPreferences(
-        session.user.id,
         { age_min: input.age_min, age_max: input.age_max, max_distance_km: input.max_distance_km },
         seeking,
       );

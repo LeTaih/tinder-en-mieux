@@ -12,8 +12,10 @@ export default function Profile() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const first = data?.photos[0];
-    if (first) signedPhotoUrl(first.storage_path).then(setPhotoUrl);
+    if (first) signedPhotoUrl(first.storage_path).then((url) => { if (!cancelled) setPhotoUrl(url); });
+    return () => { cancelled = true; };
   }, [data]);
 
   async function onSignOut() {

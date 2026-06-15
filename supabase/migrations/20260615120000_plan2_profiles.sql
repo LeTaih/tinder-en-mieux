@@ -111,6 +111,24 @@ language sql security definer set search_path = public, extensions as $$
   where id = auth.uid();
 $$;
 
+-- RPC: enregistrer ses préférences de façon atomique (upsert + remplacement des genres recherchés)
+create function public.set_my_preferences(
+  p_age_min int, p_age_max int, p_max_distance_km int, p_gender_ids uuid[]
+) returns void
+language plpgsql security invoker as $$
+begin
+  insert into public.preferences (profile_id, age_min, age_max, max_distance_km)
+  values (auth.uid(), p_age_min, p_age_max, p_max_distance_km)
+  on conflict (profile_id) do update
+    set age_min = excluded.age_min, age_max = excluded.age_max, max_distance_km = excluded.max_distance_km;
+  delete from public.preference_genders where profile_id = auth.uid();
+  if array_length(p_gender_ids, 1) is not null then
+    insert into public.preference_genders (profile_id, gender_id)
+    select auth.uid(), unnest(p_gender_ids);
+  end if;
+end;
+$$;
+
 -- ============ Storage : bucket privé + policies ============
 insert into storage.buckets (id, name, public)
 values ('profile-photos', 'profile-photos', false)
@@ -125,3 +143,9 @@ create policy "photos storage: insert own folder" on storage.objects
 create policy "photos storage: delete own folder" on storage.objects
   for delete to authenticated
   using (bucket_id = 'profile-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- Hygiène anti-abus : EXECUTE réservé aux utilisateurs authentifiés
+revoke execute on function public.set_my_location(double precision, double precision) from public;
+grant execute on function public.set_my_location(double precision, double precision) to authenticated;
+revoke execute on function public.set_my_preferences(int, int, int, uuid[]) from public;
+grant execute on function public.set_my_preferences(int, int, int, uuid[]) to authenticated;
