@@ -8,6 +8,7 @@ import { DeckCard } from '../../src/features/deck/DeckCard';
 import { clampRemaining } from '../../src/features/deck/deck-format';
 import type { DeckCandidate } from '../../src/features/deck/deck-api';
 import { MatchModal } from '../../src/features/matches/MatchModal';
+import { ProfileDetailModal } from '../../src/features/profile/ProfileDetailModal';
 
 export default function Deck() {
   const ref = useRef<SwiperCardRefType>(null);
@@ -18,6 +19,7 @@ export default function Deck() {
   const rewind = useRewind();
   const qc = useQueryClient();
   const [matchId, setMatchId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<DeckCandidate | null>(null);
 
   function onSwiped(direction: 'like' | 'pass', index: number) {
     if (!candidates) return;
@@ -82,6 +84,7 @@ export default function Deck() {
                 ref.current?.swipeBack();
                 rewind.mutate();
               }}
+              onOpenDetail={() => setDetail(item)}
             />
           )}
           onSwipeRight={(i: number) => onSwiped('like', i)}
@@ -89,6 +92,16 @@ export default function Deck() {
         />
       </View>
       {matchId ? <MatchModal matchId={matchId} onClose={() => setMatchId(null)} /> : null}
+      {detail ? (
+        <ProfileDetailModal
+          data={{
+            display_name: detail.display_name, age: detail.age, distance_km: detail.distance_km,
+            bio: detail.bio, photos: detail.photos, job: detail.job, education: detail.education,
+            height_cm: detail.height_cm, interests: detail.interests, prompts: detail.prompts,
+          }}
+          onClose={() => setDetail(null)}
+        />
+      ) : null}
     </View>
   );
 }
