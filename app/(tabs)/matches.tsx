@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { useMatches } from '../../src/features/matches/use-matches';
 import { formatCountdown, isExpired } from '../../src/features/matches/countdown';
 import type { Match } from '../../src/features/matches/matches-api';
@@ -55,8 +55,7 @@ export default function Matches() {
       <Text style={{ fontSize: 18, fontWeight: '800', marginBottom: 8 }}>Actifs</Text>
       {actifs.length === 0 ? <Text style={{ color: '#999' }}>Aucun match actif.</Text> : null}
       {actifs.map((m) => (
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        <Pressable key={m.match_id} onPress={() => router.push({ pathname: '/match/[id]', params: { id: m.match_id } } as any)}>
+        <Pressable key={m.match_id} onPress={() => router.push(`/match/${m.match_id}` as Href)}>
           <MatchRow match={m} now={now} />
         </Pressable>
       ))}
@@ -64,8 +63,7 @@ export default function Matches() {
       <Text style={{ fontSize: 18, fontWeight: '800', marginTop: 24, marginBottom: 8 }}>Expirés</Text>
       {expires.length === 0 ? <Text style={{ color: '#999' }}>Aucun match expiré.</Text> : null}
       {expires.map((m) => (
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        <Pressable key={m.match_id} onPress={() => router.push({ pathname: '/match/[id]', params: { id: m.match_id } } as any)}>
+        <Pressable key={m.match_id} onPress={() => router.push(`/match/${m.match_id}` as Href)}>
           <MatchRow match={m} now={now} />
         </Pressable>
       ))}

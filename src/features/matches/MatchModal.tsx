@@ -1,5 +1,5 @@
 import { Image, Modal, Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { useMatches } from './use-matches';
 
 type Props = { matchId: string; onClose: () => void };
@@ -19,9 +19,9 @@ export function MatchModal({ matchId, onClose }: Props) {
         {match ? (
           <Text style={{ color: 'white', fontSize: 18 }}>Toi et {match.display_name} vous êtes likés</Text>
         ) : null}
+        {/* cast Href : la route dynamique /match/[id] n'est dans les types générés (.expo) qu'après régénération par le dev server */}
         <Pressable
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onPress={() => { onClose(); router.push({ pathname: '/match/[id]', params: { id: matchId } } as any); }}
+          onPress={() => { onClose(); router.push(`/match/${matchId}` as Href); }}
           style={{ backgroundColor: 'white', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24 }}
         >
           <Text style={{ fontWeight: '700' }}>Voir le match</Text>
