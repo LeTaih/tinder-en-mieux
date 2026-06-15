@@ -95,7 +95,7 @@ export default function Photos() {
       <Pressable onPress={() => pick(true)} disabled={busy || isLoading} accessibilityRole="button" accessibilityLabel="Prendre une photo" style={{ opacity: busy || isLoading ? 0.5 : 1 }}>
         <Text style={{ color: Colors.primary, padding: Spacing.sm }}>＋ Appareil photo</Text>
       </Pressable>
-      <AppButton title="Continuer" onPress={() => router.push('/(onboarding)/preferences')} disabled={count < 1 || busy} />
+      <AppButton title="Continuer" onPress={() => router.push('/(onboarding)/interests')} disabled={count < 1 || busy} />
     </SafeAreaView>
   );
 }
