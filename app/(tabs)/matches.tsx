@@ -4,6 +4,8 @@ import { useRouter, type Href } from 'expo-router';
 import { useMatches } from '../../src/features/matches/use-matches';
 import { formatCountdown, isExpired } from '../../src/features/matches/countdown';
 import type { Match } from '../../src/features/matches/matches-api';
+import { EmptyState } from '../../src/components/EmptyState';
+import { Colors } from '../../src/lib/theme';
 
 function MatchRow({ match, now }: { match: Match; now: Date }) {
   const expired = isExpired(match.expires_at, now);
@@ -12,11 +14,11 @@ function MatchRow({ match, now }: { match: Match; now: Date }) {
       {match.photo ? (
         <Image source={{ uri: match.photo }} style={{ width: 56, height: 56, borderRadius: 28 }} />
       ) : (
-        <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: '#ddd' }} />
+        <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.borderLight }} />
       )}
       <View style={{ flex: 1 }}>
         <Text style={{ fontSize: 16, fontWeight: '600' }}>{match.display_name}</Text>
-        <Text style={{ color: expired ? '#999' : '#208AEF' }}>
+        <Text style={{ color: expired ? Colors.textFaint : Colors.primary }}>
           {expired ? 'Expiré' : `⏳ ${formatCountdown(match.expires_at, now)}`}
         </Text>
       </View>
@@ -43,27 +45,23 @@ export default function Matches() {
   const expires = all.filter((m) => isExpired(m.expires_at, now));
 
   if (all.length === 0) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <Text style={{ textAlign: 'center' }}>Pas encore de match. Va swiper !</Text>
-      </View>
-    );
+    return <EmptyState icon="💬" title="Pas encore de match" message="Va swiper pour matcher !" />;
   }
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       <Text style={{ fontSize: 18, fontWeight: '800', marginBottom: 8 }}>Actifs</Text>
-      {actifs.length === 0 ? <Text style={{ color: '#999' }}>Aucun match actif.</Text> : null}
+      {actifs.length === 0 ? <Text style={{ color: Colors.textFaint }}>Aucun match actif.</Text> : null}
       {actifs.map((m) => (
-        <Pressable key={m.match_id} onPress={() => router.push(`/match/${m.match_id}` as Href)}>
+        <Pressable key={m.match_id} onPress={() => router.push(`/match/${m.match_id}` as Href)} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <MatchRow match={m} now={now} />
         </Pressable>
       ))}
 
       <Text style={{ fontSize: 18, fontWeight: '800', marginTop: 24, marginBottom: 8 }}>Expirés</Text>
-      {expires.length === 0 ? <Text style={{ color: '#999' }}>Aucun match expiré.</Text> : null}
+      {expires.length === 0 ? <Text style={{ color: Colors.textFaint }}>Aucun match expiré.</Text> : null}
       {expires.map((m) => (
-        <Pressable key={m.match_id} onPress={() => router.push(`/match/${m.match_id}` as Href)}>
+        <Pressable key={m.match_id} onPress={() => router.push(`/match/${m.match_id}` as Href)} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <MatchRow match={m} now={now} />
         </Pressable>
       ))}

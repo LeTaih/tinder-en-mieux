@@ -27,7 +27,7 @@ export function SafetyMenu({ targetId, onActionDone, tint = '#fff' }: Props) {
   }
 
   function onBlock() {
-    Alert.alert('Bloquer cette personne ?', 'Elle disparaîtra et ne pourra plus vous contacter.', [
+    Alert.alert('Bloquer cette personne ?', 'Elle disparaîtra et ne pourra plus te contacter.', [
       { text: 'Annuler', style: 'cancel' },
       {
         text: 'Bloquer',
