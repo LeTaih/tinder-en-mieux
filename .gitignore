@@ -42,3 +42,6 @@ example
 /ios
 /android
 .env.local
+
+# Clé privée du compte de service FCM (push) — NE PAS committer
+google-service-account*.json
