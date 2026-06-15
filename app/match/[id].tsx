@@ -53,7 +53,7 @@ export default function ChatScreen() {
           title: match.display_name,
           headerRight: () => (
             <Text style={{ color: expired ? '#999' : under10 ? '#E53935' : '#208AEF', fontWeight: '600' }}>
-              {expired ? 'Expiré' : `⏳ ${formatCountdown(liveExpiresAt as string, now)}`}
+              {expired || !liveExpiresAt ? 'Expiré' : `⏳ ${formatCountdown(liveExpiresAt, now)}`}
             </Text>
           ),
         }}
