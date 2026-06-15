@@ -96,6 +96,30 @@ export type Database = {
         }
         Relationships: []
       }
+      interests: {
+        Row: {
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           created_at: string
@@ -242,6 +266,36 @@ export type Database = {
           },
         ]
       }
+      profile_interests: {
+        Row: {
+          interest_id: string
+          profile_id: string
+        }
+        Insert: {
+          interest_id: string
+          profile_id: string
+        }
+        Update: {
+          interest_id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_interests_interest_id_fkey"
+            columns: ["interest_id"]
+            isOneToOne: false
+            referencedRelation: "interests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_interests_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_photos: {
         Row: {
           created_at: string
@@ -270,6 +324,45 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_prompts: {
+        Row: {
+          answer: string
+          id: string
+          position: number
+          profile_id: string
+          prompt_id: string
+        }
+        Insert: {
+          answer: string
+          id?: string
+          position: number
+          profile_id: string
+          prompt_id: string
+        }
+        Update: {
+          answer?: string
+          id?: string
+          position?: number
+          profile_id?: string
+          prompt_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_prompts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_prompts_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
             referencedColumns: ["id"]
           },
         ]
@@ -323,6 +416,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      prompts: {
+        Row: {
+          id: string
+          is_active: boolean
+          key: string
+          question: string
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          key: string
+          question: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          key?: string
+          question?: string
+          sort_order?: number
+        }
+        Relationships: []
       }
       push_tokens: {
         Row: {
@@ -454,30 +571,6 @@ export type Database = {
           },
         ]
       }
-      interests: {
-        Row: { id: string; key: string; label: string; is_active: boolean; sort_order: number }
-        Insert: { id?: string; key: string; label: string; is_active?: boolean; sort_order?: number }
-        Update: { id?: string; key?: string; label?: string; is_active?: boolean; sort_order?: number }
-        Relationships: []
-      }
-      prompts: {
-        Row: { id: string; key: string; question: string; is_active: boolean; sort_order: number }
-        Insert: { id?: string; key: string; question: string; is_active?: boolean; sort_order?: number }
-        Update: { id?: string; key?: string; question?: string; is_active?: boolean; sort_order?: number }
-        Relationships: []
-      }
-      profile_interests: {
-        Row: { profile_id: string; interest_id: string }
-        Insert: { profile_id: string; interest_id: string }
-        Update: { profile_id?: string; interest_id?: string }
-        Relationships: []
-      }
-      profile_prompts: {
-        Row: { id: string; profile_id: string; prompt_id: string; answer: string; position: number }
-        Insert: { id?: string; profile_id: string; prompt_id: string; answer: string; position: number }
-        Update: { id?: string; profile_id?: string; prompt_id?: string; answer?: string; position?: number }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -501,11 +594,11 @@ export type Database = {
           bio: string
           display_name: string
           distance_km: number
-          education: string | null
-          height_cm: number | null
+          education: string
+          height_cm: number
           id: string
           interests: string[]
-          job: string | null
+          job: string
           photo_paths: string[]
           prompts: Json
         }[]
@@ -516,12 +609,12 @@ export type Database = {
         Args: { p_user: string }
         Returns: {
           display_name: string
-          education: string | null
+          education: string
           expires_at: string
-          height_cm: number | null
+          height_cm: number
           interests: string[]
           is_active: boolean
-          job: string | null
+          job: string
           match_id: string
           other_id: string
           photo_path: string
@@ -543,11 +636,14 @@ export type Database = {
         Args: { p_body: string; p_image_path: string; p_match_id: string }
         Returns: Json
       }
+      set_my_interests: {
+        Args: { p_interest_ids: string[] }
+        Returns: undefined
+      }
       set_my_location: {
         Args: { lat: number; lng: number }
         Returns: undefined
       }
-      set_my_interests: { Args: { p_interest_ids: string[] }; Returns: undefined }
       set_my_preferences: {
         Args: {
           p_age_max: number
@@ -557,7 +653,10 @@ export type Database = {
         }
         Returns: undefined
       }
-      set_my_prompts: { Args: { p_prompt_ids: string[]; p_answers: string[] }; Returns: undefined }
+      set_my_prompts: {
+        Args: { p_answers: string[]; p_prompt_ids: string[] }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
