@@ -40,7 +40,20 @@
       ],
       "expo-secure-store",
       "expo-apple-authentication",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "L'app accède à tes photos pour ton profil.",
+          "cameraPermission": "L'app accède à l'appareil photo pour ajouter une photo de profil."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "On utilise ta position pour te proposer des profils proches."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
