@@ -45,3 +45,6 @@ example
 
 # Clé privée du compte de service FCM (push) — NE PAS committer
 google-service-account*.json
+
+# Données de session / worktrees de l'agent — ne jamais committer
+.claude/
