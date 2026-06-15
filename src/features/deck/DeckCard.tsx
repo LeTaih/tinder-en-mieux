@@ -3,7 +3,7 @@ import { Image, Pressable, Text, View } from 'react-native';
 import type { DeckCandidate } from './deck-api';
 import { formatAge, formatDistance } from './deck-format';
 import { SafetyMenu } from '../safety/SafetyMenu';
-import { Colors, Radii } from '../../lib/theme';
+import { Colors, FontSizes, Radii } from '../../lib/theme';
 
 type Props = {
   candidate: DeckCandidate;
@@ -11,9 +11,10 @@ type Props = {
   onLike: () => void;
   onPass: () => void;
   onRewind: () => void;
+  onOpenDetail: () => void;
 };
 
-export function DeckCard({ candidate, likesRemaining, onLike, onPass, onRewind }: Props) {
+export function DeckCard({ candidate, likesRemaining, onLike, onPass, onRewind, onOpenDetail }: Props) {
   const [photoIndex, setPhotoIndex] = useState(0);
   const canLike = likesRemaining > 0;
   const photoCount = candidate.photos.length;
@@ -62,6 +63,18 @@ export function DeckCard({ candidate, likesRemaining, onLike, onPass, onRewind }
             {candidate.bio}
           </Text>
         ) : null}
+        {candidate.interests.length > 0 ? (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+            {candidate.interests.slice(0, 3).map((i) => (
+              <View key={i} style={{ backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: Radii.pill, paddingHorizontal: 10, paddingVertical: 4 }}>
+                <Text style={{ color: Colors.text, fontSize: FontSizes.sm }}>{i}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+        <Pressable accessibilityRole="button" accessibilityLabel="Voir le profil" onPress={onOpenDetail} style={{ marginTop: 8 }}>
+          <Text style={[{ color: Colors.white, fontWeight: '700' }, textShadow]}>ⓘ Voir le profil</Text>
+        </Pressable>
       </View>
 
       <View style={{ position: 'absolute', bottom: 16, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around' }}>

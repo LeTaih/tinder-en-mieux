@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
 
   const candidates = [] as Array<{
     id: string; display_name: string; age: number; distance_km: number; bio: string | null; photos: string[];
+    job: string | null; education: string | null; height_cm: number | null; interests: string[]; prompts: unknown;
   }>;
   for (const r of rows ?? []) {
     const paths: string[] = r.photo_paths ?? [];
@@ -46,6 +47,8 @@ Deno.serve(async (req) => {
     }
     candidates.push({
       id: r.id, display_name: r.display_name, age: r.age, distance_km: r.distance_km, bio: r.bio, photos,
+      job: r.job ?? null, education: r.education ?? null, height_cm: r.height_cm ?? null,
+      interests: r.interests ?? [], prompts: r.prompts ?? [],
     });
   }
 

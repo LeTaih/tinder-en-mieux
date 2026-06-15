@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import type { RichProfileFields } from '../profile/rich-types';
 
 export type DeckCandidate = {
   id: string;
@@ -7,7 +8,7 @@ export type DeckCandidate = {
   distance_km: number;
   bio: string | null;
   photos: string[];
-};
+} & RichProfileFields;
 
 export async function fetchDeck(limit = 10, offset = 0): Promise<DeckCandidate[]> {
   const { data, error } = await supabase.functions.invoke<{ candidates: DeckCandidate[] }>('get-deck', {

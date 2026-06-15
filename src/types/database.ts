@@ -280,8 +280,11 @@ export type Database = {
           birthdate: string | null
           created_at: string
           display_name: string | null
+          education: string | null
           gender_id: string | null
+          height_cm: number | null
           id: string
+          job: string | null
           location: unknown
           updated_at: string
         }
@@ -290,8 +293,11 @@ export type Database = {
           birthdate?: string | null
           created_at?: string
           display_name?: string | null
+          education?: string | null
           gender_id?: string | null
+          height_cm?: number | null
           id: string
+          job?: string | null
           location?: unknown
           updated_at?: string
         }
@@ -300,8 +306,11 @@ export type Database = {
           birthdate?: string | null
           created_at?: string
           display_name?: string | null
+          education?: string | null
           gender_id?: string | null
+          height_cm?: number | null
           id?: string
+          job?: string | null
           location?: unknown
           updated_at?: string
         }
@@ -445,6 +454,30 @@ export type Database = {
           },
         ]
       }
+      interests: {
+        Row: { id: string; key: string; label: string; is_active: boolean; sort_order: number }
+        Insert: { id?: string; key: string; label: string; is_active?: boolean; sort_order?: number }
+        Update: { id?: string; key?: string; label?: string; is_active?: boolean; sort_order?: number }
+        Relationships: []
+      }
+      prompts: {
+        Row: { id: string; key: string; question: string; is_active: boolean; sort_order: number }
+        Insert: { id?: string; key: string; question: string; is_active?: boolean; sort_order?: number }
+        Update: { id?: string; key?: string; question?: string; is_active?: boolean; sort_order?: number }
+        Relationships: []
+      }
+      profile_interests: {
+        Row: { profile_id: string; interest_id: string }
+        Insert: { profile_id: string; interest_id: string }
+        Update: { profile_id?: string; interest_id?: string }
+        Relationships: []
+      }
+      profile_prompts: {
+        Row: { id: string; profile_id: string; prompt_id: string; answer: string; position: number }
+        Insert: { id?: string; profile_id: string; prompt_id: string; answer: string; position: number }
+        Update: { id?: string; profile_id?: string; prompt_id?: string; answer?: string; position?: number }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -468,8 +501,13 @@ export type Database = {
           bio: string
           display_name: string
           distance_km: number
+          education: string | null
+          height_cm: number | null
           id: string
+          interests: string[]
+          job: string | null
           photo_paths: string[]
+          prompts: Json
         }[]
       }
       increment_badge: { Args: { p_user: string }; Returns: number }
@@ -478,11 +516,17 @@ export type Database = {
         Args: { p_user: string }
         Returns: {
           display_name: string
+          education: string | null
           expires_at: string
+          height_cm: number | null
+          interests: string[]
           is_active: boolean
+          job: string | null
           match_id: string
           other_id: string
           photo_path: string
+          photo_paths: string[]
+          prompts: Json
         }[]
       }
       notify_expiring_matches: { Args: never; Returns: undefined }
@@ -503,6 +547,7 @@ export type Database = {
         Args: { lat: number; lng: number }
         Returns: undefined
       }
+      set_my_interests: { Args: { p_interest_ids: string[] }; Returns: undefined }
       set_my_preferences: {
         Args: {
           p_age_max: number
@@ -512,6 +557,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_my_prompts: { Args: { p_prompt_ids: string[]; p_answers: string[] }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

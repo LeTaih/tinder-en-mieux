@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSession } from '../../src/features/auth/session-provider';
 import { useMatches } from '../../src/features/matches/use-matches';
@@ -8,6 +8,7 @@ import { useMessages, useSendMessage } from '../../src/features/chat/use-chat';
 import { MessageBubble } from '../../src/features/chat/MessageBubble';
 import { ChatInput } from '../../src/features/chat/ChatInput';
 import { SafetyMenu } from '../../src/features/safety/SafetyMenu';
+import { ProfileDetailModal } from '../../src/features/profile/ProfileDetailModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '../../src/components/EmptyState';
 import { Colors } from '../../src/lib/theme';
@@ -29,6 +30,7 @@ export default function ChatScreen() {
   const send = useSendMessage(matchId);
 
   const [now, setNow] = useState(() => new Date());
+  const [showProfile, setShowProfile] = useState(false);
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
@@ -80,6 +82,9 @@ export default function ChatScreen() {
               <Text style={{ color: expired ? Colors.textFaint : under10 ? Colors.danger : Colors.primary, fontWeight: '600' }}>
                 {expired ? 'Expiré' : `⏳ ${formatCountdown(expiresAt, now)}`}
               </Text>
+              <Pressable accessibilityRole="button" accessibilityLabel="Voir le profil" hitSlop={8} onPress={() => setShowProfile(true)}>
+                <Text style={{ fontSize: 18 }}>ⓘ</Text>
+              </Pressable>
               <SafetyMenu
                 targetId={match.other_id}
                 tint="#333"
@@ -120,6 +125,16 @@ export default function ChatScreen() {
           />
         )}
       </KeyboardAvoidingView>
+      {showProfile ? (
+        <ProfileDetailModal
+          data={{
+            display_name: match.display_name, age: 0, distance_km: 0, bio: null, photos: match.photos,
+            job: match.job, education: match.education, height_cm: match.height_cm,
+            interests: match.interests, prompts: match.prompts,
+          }}
+          onClose={() => setShowProfile(false)}
+        />
+      ) : null}
     </View>
   );
 }
