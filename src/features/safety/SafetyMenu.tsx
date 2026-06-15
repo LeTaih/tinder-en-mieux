@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Alert, Modal, Pressable, Text, View } from 'react-native';
 import { REPORT_REASONS, type ReportReason } from './report-reasons';
 import { useBlockUser, useReportUser } from './use-safety';
+import { Colors } from '../../lib/theme';
 
 type Props = {
   targetId: string;
@@ -10,7 +11,7 @@ type Props = {
   tint?: string;
 };
 
-export function SafetyMenu({ targetId, onActionDone, tint = '#fff' }: Props) {
+export function SafetyMenu({ targetId, onActionDone, tint = Colors.white }: Props) {
   const [open, setOpen] = useState(false);
   const [showReasons, setShowReasons] = useState(false);
   const block = useBlockUser();
@@ -27,7 +28,7 @@ export function SafetyMenu({ targetId, onActionDone, tint = '#fff' }: Props) {
   }
 
   function onBlock() {
-    Alert.alert('Bloquer cette personne ?', 'Elle disparaîtra et ne pourra plus vous contacter.', [
+    Alert.alert('Bloquer cette personne ?', 'Elle disparaîtra et ne pourra plus te contacter.', [
       { text: 'Annuler', style: 'cancel' },
       {
         text: 'Bloquer',
@@ -49,12 +50,12 @@ export function SafetyMenu({ targetId, onActionDone, tint = '#fff' }: Props) {
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
         <Pressable
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' }}
+          style={{ flex: 1, backgroundColor: Colors.overlay, justifyContent: 'flex-end' }}
           onPress={close}
         >
           <Pressable
             style={{
-              backgroundColor: 'white',
+              backgroundColor: Colors.white,
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               padding: 16,
@@ -84,7 +85,7 @@ export function SafetyMenu({ targetId, onActionDone, tint = '#fff' }: Props) {
               </>
             )}
             <Pressable onPress={close} style={{ paddingVertical: 12 }}>
-              <Text style={{ fontSize: 16, color: '#888' }}>Annuler</Text>
+              <Text style={{ fontSize: 16, color: Colors.textMuted }}>Annuler</Text>
             </Pressable>
           </Pressable>
         </Pressable>

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Button, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Text, View } from 'react-native';
+import { EmptyState } from '../../src/components/EmptyState';
 import { Swiper, type SwiperCardRefType } from 'rn-swiper-list';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDeck, useLikesRemaining, useRewind, useSwipe } from '../../src/features/deck/use-deck';
@@ -51,20 +52,11 @@ export default function Deck() {
   }
 
   if (isError) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 }}>
-        <Text style={{ textAlign: 'center' }}>Impossible de charger les profils.</Text>
-        <Button title="Réessayer" onPress={() => refetch()} />
-      </View>
-    );
+    return <EmptyState icon="⚠️" title="Impossible de charger les profils" actionLabel="Réessayer" onAction={() => refetch()} />;
   }
 
   if (!candidates || candidates.length === 0) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <Text style={{ fontSize: 16, textAlign: 'center' }}>Plus de profils pour le moment. Reviens plus tard !</Text>
-      </View>
-    );
+    return <EmptyState icon="🔥" title="Plus de profils pour le moment" message="Reviens plus tard !" />;
   }
 
   return (

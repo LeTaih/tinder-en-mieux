@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Alert, Button, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSession } from '../../src/features/auth/session-provider';
 import { useGenders } from '../../src/features/profile/use-profile';
 import { upsertIdentity } from '../../src/features/profile/profile-api';
 import { authErrorMessage } from '../../src/features/auth/errors';
+import { AppButton } from '../../src/components/AppButton';
+import { Colors, Radii, Spacing } from '../../src/lib/theme';
 
 export default function Gender() {
   const router = useRouter();
@@ -33,16 +36,23 @@ export default function Gender() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 24, gap: 12 }}>
+    <SafeAreaView style={{ flex: 1, padding: Spacing.xxl, gap: Spacing.md }}>
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Ton genre</Text>
-      {isLoading ? <Text>Chargement…</Text> : null}
+      {isLoading ? <ActivityIndicator /> : null}
       {(genders ?? []).map((g) => (
         <Pressable key={g.id} onPress={() => setSelected(g.id)}
-          style={{ padding: 14, borderRadius: 8, borderWidth: 1, borderColor: selected === g.id ? '#208AEF' : '#ccc', backgroundColor: selected === g.id ? '#E6F0FF' : 'white' }}>
+          style={({ pressed }) => ({
+            padding: 14,
+            borderRadius: Radii.sm,
+            borderWidth: 1,
+            borderColor: selected === g.id ? Colors.primary : Colors.border,
+            backgroundColor: selected === g.id ? Colors.primaryBg : Colors.white,
+            opacity: pressed ? 0.7 : 1,
+          })}>
           <Text>{g.label}</Text>
         </Pressable>
       ))}
-      <Button title={busy ? '...' : 'Continuer'} onPress={onNext} disabled={busy || !selected} />
-    </View>
+      <AppButton title="Continuer" onPress={onNext} loading={busy} disabled={!selected} />
+    </SafeAreaView>
   );
 }

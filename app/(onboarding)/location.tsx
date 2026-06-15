@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Alert, Button, Text, View } from 'react-native';
+import { Alert, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 import { useSession } from '../../src/features/auth/session-provider';
 import { setMyLocation } from '../../src/features/profile/profile-api';
 import { authErrorMessage } from '../../src/features/auth/errors';
+import { AppButton } from '../../src/components/AppButton';
+import { Spacing } from '../../src/lib/theme';
 
 export default function LocationStep() {
   const { session } = useSession();
@@ -31,10 +34,10 @@ export default function LocationStep() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 24, gap: 12, justifyContent: 'center' }}>
+    <SafeAreaView style={{ flex: 1, padding: Spacing.xxl, gap: Spacing.md, justifyContent: 'center' }}>
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Ta position</Text>
       <Text>On utilise ta position pour te proposer des profils proches. Elle n'est jamais partagée précisément.</Text>
-      <Button title={busy ? '...' : 'Activer la localisation et terminer'} onPress={onFinish} disabled={busy} />
-    </View>
+      <AppButton title="Activer la localisation et terminer" onPress={onFinish} loading={busy} />
+    </SafeAreaView>
   );
 }

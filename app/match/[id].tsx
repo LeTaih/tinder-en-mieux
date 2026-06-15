@@ -8,6 +8,9 @@ import { useMessages, useSendMessage } from '../../src/features/chat/use-chat';
 import { MessageBubble } from '../../src/features/chat/MessageBubble';
 import { ChatInput } from '../../src/features/chat/ChatInput';
 import { SafetyMenu } from '../../src/features/safety/SafetyMenu';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { EmptyState } from '../../src/components/EmptyState';
+import { Colors } from '../../src/lib/theme';
 
 const TEN_MIN_MS = 10 * 60 * 1000;
 
@@ -15,6 +18,7 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const matchId = id as string;
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { session } = useSession();
   const myId = session?.user.id;
 
@@ -45,7 +49,7 @@ export default function ChatScreen() {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <Stack.Screen options={{ headerShown: true, title: 'Conversation' }} />
-        <Text style={{ textAlign: 'center', color: '#777' }}>Conversation indisponible.</Text>
+        <Text style={{ textAlign: 'center', color: Colors.textMuted }}>Conversation indisponible.</Text>
       </View>
     );
   }
@@ -73,7 +77,7 @@ export default function ChatScreen() {
           title: match.display_name,
           headerRight: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <Text style={{ color: expired ? '#999' : under10 ? '#E53935' : '#208AEF', fontWeight: '600' }}>
+              <Text style={{ color: expired ? Colors.textFaint : under10 ? Colors.danger : Colors.primary, fontWeight: '600' }}>
                 {expired ? 'Expiré' : `⏳ ${formatCountdown(expiresAt, now)}`}
               </Text>
               <SafetyMenu
@@ -85,29 +89,37 @@ export default function ChatScreen() {
           ),
         }}
       />
-      <FlatList
+      <KeyboardAvoidingView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 12 }}
-        inverted
-        data={[...messages].reverse()}
-        keyExtractor={(m) => m.id}
-        renderItem={({ item }) => <MessageBubble message={item} mine={item.sender_id === myId} />}
-      />
-      {expired ? (
-        <View style={{ padding: 16, backgroundColor: '#f2f2f2' }}>
-          <Text style={{ textAlign: 'center', color: '#777' }}>
-            Ce match a expiré — tu ne peux plus envoyer de messages.
-          </Text>
-        </View>
-      ) : (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 44 : 0}
+      >
+        {messages.length === 0 ? (
+          <EmptyState title="Aucun message" message="Lance la conversation !" />
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            contentContainerStyle={{ padding: 12 }}
+            inverted
+            data={[...messages].reverse()}
+            keyExtractor={(m) => m.id}
+            renderItem={({ item }) => <MessageBubble message={item} mine={item.sender_id === myId} />}
+          />
+        )}
+        {expired ? (
+          <View style={{ padding: 16, backgroundColor: Colors.bgMuted }}>
+            <Text style={{ textAlign: 'center', color: Colors.textMuted }}>
+              Ce match a expiré — tu ne peux plus envoyer de messages.
+            </Text>
+          </View>
+        ) : (
           <ChatInput
             disabled={send.isPending}
             onSendText={(body) => send.mutate({ body })}
             onSendImage={(localUri) => send.mutate({ localUri })}
           />
-        </KeyboardAvoidingView>
-      )}
+        )}
+      </KeyboardAvoidingView>
     </View>
   );
 }

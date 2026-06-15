@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Colors, Radii, Spacing } from '../../lib/theme';
 
 type Props = {
   disabled?: boolean;
@@ -33,18 +34,25 @@ export function ChatInput({ disabled, onSendText, onSendImage }: Props) {
   const canSend = !disabled && text.trim().length > 0;
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8 }}>
-      <Pressable onPress={pickImage} disabled={disabled} hitSlop={8}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.sm }}>
+      <Pressable
+        onPress={pickImage}
+        disabled={disabled}
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel="Joindre une image"
+        style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+      >
         <Text style={{ fontSize: 22 }}>📎</Text>
       </Pressable>
       <TextInput
         style={{
           flex: 1,
           borderWidth: 1,
-          borderColor: '#ddd',
-          borderRadius: 20,
+          borderColor: Colors.borderLight,
+          borderRadius: Radii.pill,
           paddingHorizontal: 14,
-          paddingVertical: 8,
+          paddingVertical: Spacing.sm,
         }}
         placeholder="Message…"
         value={text}
@@ -56,15 +64,20 @@ export function ChatInput({ disabled, onSendText, onSendImage }: Props) {
       <Pressable
         onPress={submitText}
         disabled={!canSend}
+        accessibilityRole="button"
+        accessibilityLabel="Envoyer"
         style={{
-          backgroundColor: '#208AEF',
+          backgroundColor: Colors.primary,
           opacity: canSend ? 1 : 0.4,
-          paddingHorizontal: 16,
-          paddingVertical: 10,
-          borderRadius: 20,
+          minWidth: 44,
+          minHeight: 44,
+          paddingHorizontal: Spacing.lg,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: Radii.pill,
         }}
       >
-        <Text style={{ color: 'white', fontSize: 18 }}>➤</Text>
+        <Text style={{ color: Colors.white, fontSize: 18 }}>➤</Text>
       </Pressable>
     </View>
   );

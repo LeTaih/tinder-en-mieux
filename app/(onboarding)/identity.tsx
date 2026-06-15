@@ -1,8 +1,12 @@
 import { useState } from 'react';
-import { Button, Platform, Text, TextInput, View } from 'react-native';
+import { Platform, Text, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSession } from '../../src/features/auth/session-provider';
 import { isAdult } from '../../src/features/profile/validation';
+import { AppButton } from '../../src/components/AppButton';
+import { ErrorText } from '../../src/components/ErrorText';
+import { Colors, Radii, Spacing } from '../../src/lib/theme';
 
 export default function Identity() {
   const router = useRouter();
@@ -23,17 +27,17 @@ export default function Identity() {
   if (!session) return null;
 
   return (
-    <View style={{ flex: 1, padding: 24, gap: 12 }}>
+    <SafeAreaView style={{ flex: 1, padding: Spacing.xxl, gap: Spacing.md }}>
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Qui es-tu ?</Text>
       <TextInput placeholder="Prénom" value={name} onChangeText={setName}
-        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }} />
+        style={{ borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }} />
       <TextInput placeholder="Date de naissance (AAAA-MM-JJ)" value={birthdate} onChangeText={setBirthdate}
         autoCapitalize="none" keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
-        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }} />
+        style={{ borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }} />
       <TextInput placeholder="Bio (optionnel)" value={bio} onChangeText={setBio} multiline
-        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, minHeight: 80 }} />
-      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
-      <Button title="Continuer" onPress={onNext} />
-    </View>
+        style={{ borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md, minHeight: 80 }} />
+      <ErrorText message={error} />
+      <AppButton title="Continuer" onPress={onNext} />
+    </SafeAreaView>
   );
 }

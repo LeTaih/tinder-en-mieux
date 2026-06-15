@@ -1,7 +1,9 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SessionProvider, useSession } from '../src/features/auth/session-provider';
 import { useProfileCompleteness } from '../src/features/profile/use-profile';
 import { usePushNotifications } from '../src/features/notifications/use-push';
@@ -40,11 +42,14 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <SessionProvider>
-          <RootNavigator />
-        </SessionProvider>
-      </QueryClientProvider>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <SessionProvider>
+            <StatusBar style="dark" />
+            <RootNavigator />
+          </SessionProvider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

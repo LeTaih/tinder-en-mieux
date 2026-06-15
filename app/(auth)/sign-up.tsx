@@ -1,9 +1,13 @@
 import { useState } from 'react';
-import { Alert, Button, Text, TextInput, View } from 'react-native';
+import { Alert, Text, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import { validateCredentials } from '../../src/features/auth/validation';
 import { authErrorMessage } from '../../src/features/auth/errors';
 import { signUpWithEmail } from '../../src/features/auth/auth-api';
+import { AppButton } from '../../src/components/AppButton';
+import { ErrorText } from '../../src/components/ErrorText';
+import { Colors, Radii, Spacing } from '../../src/lib/theme';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -27,7 +31,7 @@ export default function SignUp() {
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 12 }}>
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: Spacing.xxl, gap: Spacing.md }}>
       <Text style={{ fontSize: 24, fontWeight: '700' }}>Créer un compte</Text>
       <TextInput
         placeholder="E-mail"
@@ -35,19 +39,19 @@ export default function SignUp() {
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
-        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }}
+        style={{ borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }}
       />
-      {errors.email ? <Text style={{ color: 'red' }}>{errors.email}</Text> : null}
+      <ErrorText message={errors.email} />
       <TextInput
         placeholder="Mot de passe"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }}
+        style={{ borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }}
       />
-      {errors.password ? <Text style={{ color: 'red' }}>{errors.password}</Text> : null}
-      <Button title={busy ? '...' : "S'inscrire"} onPress={onSubmit} disabled={busy} />
+      <ErrorText message={errors.password} />
+      <AppButton title="S'inscrire" onPress={onSubmit} loading={busy} />
       <Link href="/sign-in">Déjà un compte ? Se connecter</Link>
-    </View>
+    </SafeAreaView>
   );
 }
