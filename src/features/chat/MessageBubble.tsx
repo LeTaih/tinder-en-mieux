@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import { signedChatImageUrl } from './chat-image';
 import { isImageMessage, type Message } from './chat-format';
+import { Colors, Radii } from '../../lib/theme';
 
 export function MessageBubble({ message, mine }: { message: Message; mine: boolean }) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -28,9 +29,9 @@ export function MessageBubble({ message, mine }: { message: Message; mine: boole
     return (
       <View style={containerStyle}>
         {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={{ width: 200, height: 250, borderRadius: 12 }} />
+          <Image source={{ uri: imageUrl }} style={{ width: 200, height: 250, borderRadius: Radii.md }} />
         ) : (
-          <View style={{ width: 200, height: 250, borderRadius: 12, backgroundColor: '#ddd' }} />
+          <View style={{ width: 200, height: 250, borderRadius: Radii.md, backgroundColor: Colors.borderLight }} />
         )}
       </View>
     );
@@ -40,13 +41,13 @@ export function MessageBubble({ message, mine }: { message: Message; mine: boole
     <View style={containerStyle}>
       <View
         style={{
-          backgroundColor: mine ? '#208AEF' : '#E9E9EB',
-          borderRadius: 16,
+          backgroundColor: mine ? Colors.primary : Colors.bubbleOther,
+          borderRadius: Radii.lg,
           paddingHorizontal: 12,
           paddingVertical: 8,
         }}
       >
-        <Text style={{ color: mine ? 'white' : 'black' }}>{message.body}</Text>
+        <Text style={{ color: mine ? Colors.white : Colors.black }}>{message.body}</Text>
       </View>
     </View>
   );
