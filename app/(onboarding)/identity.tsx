@@ -1,0 +1,39 @@
+import { useState } from 'react';
+import { Button, Platform, Text, TextInput, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSession } from '../../src/features/auth/session-provider';
+import { isAdult } from '../../src/features/profile/validation';
+
+export default function Identity() {
+  const router = useRouter();
+  const { session } = useSession();
+  const [name, setName] = useState('');
+  const [birthdate, setBirthdate] = useState(''); // format AAAA-MM-JJ
+  const [bio, setBio] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  function onNext() {
+    setError(null);
+    if (name.trim().length === 0) return setError('Indique ton prénom.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) return setError('Date au format AAAA-MM-JJ.');
+    if (!isAdult(birthdate, new Date())) return setError('Tu dois avoir au moins 18 ans.');
+    router.push({ pathname: '/(onboarding)/gender', params: { name: name.trim(), birthdate, bio } });
+  }
+
+  if (!session) return null;
+
+  return (
+    <View style={{ flex: 1, padding: 24, gap: 12 }}>
+      <Text style={{ fontSize: 20, fontWeight: '700' }}>Qui es-tu ?</Text>
+      <TextInput placeholder="Prénom" value={name} onChangeText={setName}
+        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }} />
+      <TextInput placeholder="Date de naissance (AAAA-MM-JJ)" value={birthdate} onChangeText={setBirthdate}
+        autoCapitalize="none" keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }} />
+      <TextInput placeholder="Bio (optionnel)" value={bio} onChangeText={setBio} multiline
+        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, minHeight: 80 }} />
+      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
+      <Button title="Continuer" onPress={onNext} />
+    </View>
+  );
+}
