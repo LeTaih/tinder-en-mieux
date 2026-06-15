@@ -195,6 +195,12 @@ export type Database = {
           },
         ]
       }
+      swipes: {
+        Row: { id: string; swiper_id: string; swipee_id: string; direction: string; created_at: string };
+        Insert: { id?: string; swiper_id: string; swipee_id: string; direction: string; created_at?: string };
+        Update: { id?: string; swiper_id?: string; swipee_id?: string; direction?: string; created_at?: string };
+        Relationships: [];
+      };
     }
     Views: {
       [_ in never]: never
@@ -213,6 +219,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      record_swipe: {
+        Args: { p_target: string; p_direction: string };
+        Returns: number;
+      };
+      rewind_last_swipe: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      likes_remaining_today: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
     }
     Enums: {
       [_ in never]: never
