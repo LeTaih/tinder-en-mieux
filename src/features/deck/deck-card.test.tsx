@@ -4,7 +4,7 @@ import { DeckCard } from './DeckCard';
 // On isole DeckCard : ce test ne couvre pas SafetyMenu (qui importe supabase via ses hooks).
 jest.mock('../safety/SafetyMenu', () => ({ SafetyMenu: () => null }));
 
-const candidate = { id: 'c1', display_name: 'Léa', age: 24, distance_km: 3, bio: 'Salut', photos: ['https://x/p.jpg'] };
+const candidate = { id: 'c1', display_name: 'Léa', age: 24, distance_km: 3, bio: 'Salut', photos: ['https://x/p.jpg'], job: null, education: null, height_cm: null, interests: [], prompts: [] };
 
 test('affiche prénom, âge et distance', () => {
   render(<DeckCard candidate={candidate} likesRemaining={5} onLike={jest.fn()} onPass={jest.fn()} onRewind={jest.fn()} />);
