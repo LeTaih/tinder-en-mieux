@@ -23,6 +23,7 @@ function RootNavigator() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!session && complete === true}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="match/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={!!session && complete !== true}>
         <Stack.Screen name="(onboarding)" />

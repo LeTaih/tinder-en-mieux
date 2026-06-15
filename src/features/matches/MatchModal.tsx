@@ -20,10 +20,11 @@ export function MatchModal({ matchId, onClose }: Props) {
           <Text style={{ color: 'white', fontSize: 18 }}>Toi et {match.display_name} vous êtes likés</Text>
         ) : null}
         <Pressable
-          onPress={() => { onClose(); router.push('/(tabs)/matches'); }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onPress={() => { onClose(); router.push({ pathname: '/match/[id]', params: { id: matchId } } as any); }}
           style={{ backgroundColor: 'white', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24 }}
         >
-          <Text style={{ fontWeight: '700' }}>Voir mes matchs</Text>
+          <Text style={{ fontWeight: '700' }}>Voir le match</Text>
         </Pressable>
         <Pressable onPress={onClose}>
           <Text style={{ color: 'white' }}>Continuer à swiper</Text>
