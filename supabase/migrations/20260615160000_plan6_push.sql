@@ -129,16 +129,22 @@ begin
   select decrypted_secret into v_url from vault.decrypted_secrets where name = 'push_function_url';
   select decrypted_secret into v_secret from vault.decrypted_secrets where name = 'push_internal_secret';
   if v_url is null or v_secret is null then return; end if;
-  perform net.http_post(
-    url := v_url,
-    headers := jsonb_build_object('Content-Type', 'application/json', 'x-internal-secret', v_secret),
-    body := jsonb_build_object(
-      'user_ids', to_jsonb(p_user_ids),
-      'title', p_title,
-      'body', p_body,
-      'data', coalesce(p_data, '{}'::jsonb)
-    )
-  );
+  -- Une notif ne doit JAMAIS bloquer une écriture métier (message/match) ni la boucle cron :
+  -- on avale toute erreur d'envoi.
+  begin
+    perform net.http_post(
+      url := v_url,
+      headers := jsonb_build_object('Content-Type', 'application/json', 'x-internal-secret', v_secret),
+      body := jsonb_build_object(
+        'user_ids', to_jsonb(p_user_ids),
+        'title', p_title,
+        'body', p_body,
+        'data', coalesce(p_data, '{}'::jsonb)
+      )
+    );
+  exception when others then
+    null;
+  end;
 end;
 $$;
 revoke execute on function public.call_send_push(uuid[], text, text, jsonb) from public, authenticated;
