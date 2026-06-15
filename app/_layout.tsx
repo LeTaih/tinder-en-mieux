@@ -4,12 +4,14 @@ import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SessionProvider, useSession } from '../src/features/auth/session-provider';
 import { useProfileCompleteness } from '../src/features/profile/use-profile';
+import { usePushNotifications } from '../src/features/notifications/use-push';
 import { queryClient } from '../src/lib/query-client';
 
 function RootNavigator() {
   const { session, loading } = useSession();
   const userId = session?.user.id;
   const { complete, isLoading: profileLoading } = useProfileCompleteness(userId);
+  usePushNotifications(userId);
 
   if (loading || (!!session && profileLoading)) {
     return (
