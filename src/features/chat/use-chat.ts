@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Alert } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import { fetchMessages, sendImage, sendText } from './chat-api';
@@ -45,6 +46,10 @@ export function useSendMessage(matchId: string) {
       qc.setQueryData<Message[]>(['messages', matchId], (prev) => sortAndDedupe([...(prev ?? []), msg]));
       // Le timer a bougé : rafraîchir la liste des matchs (compte à rebours).
       qc.invalidateQueries({ queryKey: ['matches'] });
+    },
+    onError: () => {
+      // Échec d'envoi (match expiré entre-temps, upload, réseau…) : pas de bulle fantôme.
+      Alert.alert('Envoi impossible', "Le message n'a pas pu être envoyé. Réessaie.");
     },
   });
 }
