@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Text, View } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSession } from '../../src/features/auth/session-provider';
 import { useMatches } from '../../src/features/matches/use-matches';
 import { formatCountdown, isExpired } from '../../src/features/matches/countdown';
 import { useMessages, useSendMessage } from '../../src/features/chat/use-chat';
 import { MessageBubble } from '../../src/features/chat/MessageBubble';
 import { ChatInput } from '../../src/features/chat/ChatInput';
+import { SafetyMenu } from '../../src/features/safety/SafetyMenu';
 
 const TEN_MIN_MS = 10 * 60 * 1000;
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const matchId = id as string;
+  const router = useRouter();
   const { session } = useSession();
   const myId = session?.user.id;
 
-  const { data: matches } = useMatches();
+  const { data: matches, isLoading: matchesLoading } = useMatches();
   const match = (matches ?? []).find((m) => m.match_id === matchId);
 
-  const { data: messages = [], isLoading } = useMessages(matchId);
+  const { data: messages = [], isLoading: messagesLoading } = useMessages(matchId);
   const send = useSendMessage(matchId);
 
   const [now, setNow] = useState(() => new Date());
@@ -28,7 +30,28 @@ export default function ChatScreen() {
     return () => clearInterval(t);
   }, []);
 
-  if (!match || !myId || (isLoading && messages.length === 0)) {
+  // Session ou liste des matchs encore en cours de chargement.
+  if (!myId || matchesLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  // Matchs chargés mais celui-ci est absent (bloqué, expiré et purgé, ou supprimé) :
+  // on évite le spinner infini en affichant un état clair (+ bouton retour via l'en-tête).
+  if (!match) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <Stack.Screen options={{ headerShown: true, title: 'Conversation' }} />
+        <Text style={{ textAlign: 'center', color: '#777' }}>Conversation indisponible.</Text>
+      </View>
+    );
+  }
+
+  // Match présent : messages encore en cours de premier chargement.
+  if (messagesLoading && messages.length === 0) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator />
@@ -49,9 +72,16 @@ export default function ChatScreen() {
           headerShown: true,
           title: match.display_name,
           headerRight: () => (
-            <Text style={{ color: expired ? '#999' : under10 ? '#E53935' : '#208AEF', fontWeight: '600' }}>
-              {expired ? 'Expiré' : `⏳ ${formatCountdown(expiresAt, now)}`}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Text style={{ color: expired ? '#999' : under10 ? '#E53935' : '#208AEF', fontWeight: '600' }}>
+                {expired ? 'Expiré' : `⏳ ${formatCountdown(expiresAt, now)}`}
+              </Text>
+              <SafetyMenu
+                targetId={match.other_id}
+                tint="#333"
+                onActionDone={() => router.back()}
+              />
+            </View>
           ),
         }}
       />

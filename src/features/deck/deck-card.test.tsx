@@ -1,6 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { DeckCard } from './DeckCard';
 
+// On isole DeckCard : ce test ne couvre pas SafetyMenu (qui importe supabase via ses hooks).
+jest.mock('../safety/SafetyMenu', () => ({ SafetyMenu: () => null }));
+
 const candidate = { id: 'c1', display_name: 'Léa', age: 24, distance_km: 3, bio: 'Salut', photos: ['https://x/p.jpg'] };
 
 test('affiche prénom, âge et distance', () => {

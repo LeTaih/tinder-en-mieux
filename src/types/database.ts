@@ -311,6 +311,48 @@ export type Database = {
           },
         ]
       }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reported_id?: string
+          reporter_id?: string
+        }
+        Relationships: []
+      }
       swipes: {
         Row: {
           created_at: string
@@ -378,6 +420,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      block_user: {
+        Args: { p_target: string }
+        Returns: undefined
+      }
       clear_badge: { Args: never; Returns: undefined }
       deck_candidates: {
         Args: { p_limit?: number; p_offset?: number; p_user: string }
@@ -405,6 +451,10 @@ export type Database = {
       record_swipe: {
         Args: { p_direction: string; p_target: string }
         Returns: Json
+      }
+      report_user: {
+        Args: { p_reason: string; p_target: string }
+        Returns: undefined
       }
       rewind_last_swipe: { Args: never; Returns: string }
       send_message: {

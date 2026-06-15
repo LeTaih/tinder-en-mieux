@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import type { DeckCandidate } from './deck-api';
 import { formatAge, formatDistance } from './deck-format';
+import { SafetyMenu } from '../safety/SafetyMenu';
 
 type Props = {
   candidate: DeckCandidate;
@@ -24,6 +25,9 @@ export function DeckCard({ candidate, likesRemaining, onLike, onPass, onRewind }
       >
         {photo ? <Image source={{ uri: photo }} style={{ flex: 1 }} resizeMode="cover" /> : null}
       </Pressable>
+      <View style={{ position: 'absolute', top: 12, right: 12 }}>
+        <SafetyMenu targetId={candidate.id} />
+      </View>
       <View style={{ position: 'absolute', bottom: 90, left: 16, right: 16 }}>
         <Text style={{ fontSize: 24, fontWeight: '800', color: 'white' }}>
           {candidate.display_name}, {formatAge(candidate.age)}
