@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Alert, Button, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
@@ -12,6 +13,8 @@ import { insertPhoto } from '../../src/features/profile/profile-api';
 import { signedPhotoUrl } from '../../src/features/profile/signed-url';
 import { PHOTO_COMPRESS, PHOTO_MAX_DIMENSION, photoStoragePath } from '../../src/features/profile/image';
 import { authErrorMessage } from '../../src/features/auth/errors';
+import { AppButton } from '../../src/components/AppButton';
+import { Colors, Radii, Spacing } from '../../src/lib/theme';
 
 declare const atob: (s: string) => string;
 
@@ -79,24 +82,20 @@ export default function Photos() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 24, gap: 12 }}>
+    <SafeAreaView style={{ flex: 1, padding: Spacing.xxl, gap: Spacing.md }}>
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Tes photos (1 à 6)</Text>
       <ScrollView horizontal style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 8 }}>
         {thumbs.map((t) => (
-          <Image key={t.id} source={{ uri: t.url }} style={{ width: 90, height: 120, borderRadius: 8 }} />
+          <Image key={t.id} source={{ uri: t.url }} style={{ width: 90, height: 120, borderRadius: Radii.sm }} />
         ))}
       </ScrollView>
-      <Pressable onPress={() => pick(false)} disabled={busy || isLoading}>
-        <Text style={{ color: '#208AEF', padding: 8 }}>＋ Galerie</Text>
+      <Pressable onPress={() => pick(false)} disabled={busy || isLoading} accessibilityRole="button" accessibilityLabel="Ajouter une photo depuis la galerie" style={{ opacity: busy || isLoading ? 0.5 : 1 }}>
+        <Text style={{ color: Colors.primary, padding: Spacing.sm }}>＋ Galerie</Text>
       </Pressable>
-      <Pressable onPress={() => pick(true)} disabled={busy || isLoading}>
-        <Text style={{ color: '#208AEF', padding: 8 }}>＋ Appareil photo</Text>
+      <Pressable onPress={() => pick(true)} disabled={busy || isLoading} accessibilityRole="button" accessibilityLabel="Prendre une photo" style={{ opacity: busy || isLoading ? 0.5 : 1 }}>
+        <Text style={{ color: Colors.primary, padding: Spacing.sm }}>＋ Appareil photo</Text>
       </Pressable>
-      <Button
-        title="Continuer"
-        onPress={() => router.push('/(onboarding)/preferences')}
-        disabled={count < 1 || busy}
-      />
-    </View>
+      <AppButton title="Continuer" onPress={() => router.push('/(onboarding)/preferences')} disabled={count < 1 || busy} />
+    </SafeAreaView>
   );
 }

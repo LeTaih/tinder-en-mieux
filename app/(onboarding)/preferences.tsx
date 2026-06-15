@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { Alert, Button, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSession } from '../../src/features/auth/session-provider';
 import { useGenders } from '../../src/features/profile/use-profile';
 import { validatePreferences } from '../../src/features/profile/validation';
 import { upsertPreferences } from '../../src/features/profile/profile-api';
 import { authErrorMessage } from '../../src/features/auth/errors';
+import { AppButton } from '../../src/components/AppButton';
+import { ErrorText } from '../../src/components/ErrorText';
+import { Colors, Radii, Spacing } from '../../src/lib/theme';
 
 export default function Preferences() {
   const router = useRouter();
@@ -49,24 +53,24 @@ export default function Preferences() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 24, gap: 12 }}>
+    <SafeAreaView style={{ flex: 1, padding: Spacing.xxl, gap: Spacing.md }}>
       <Text style={{ fontSize: 20, fontWeight: '700' }}>Tu cherches…</Text>
       {(genders ?? []).map((g) => (
         <Pressable key={g.id} onPress={() => toggle(g.id)}
-          style={{ padding: 14, borderRadius: 8, borderWidth: 1, borderColor: seeking.includes(g.id) ? '#208AEF' : '#ccc', backgroundColor: seeking.includes(g.id) ? '#E6F0FF' : 'white' }}>
+          style={({ pressed }) => ({ padding: 14, borderRadius: Radii.sm, borderWidth: 1, borderColor: seeking.includes(g.id) ? Colors.primary : Colors.border, backgroundColor: seeking.includes(g.id) ? Colors.primaryBg : Colors.white, opacity: pressed ? 0.7 : 1 })}>
           <Text>{g.label}</Text>
         </Pressable>
       ))}
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <TextInput placeholder="Âge min" value={ageMin} onChangeText={setAgeMin} keyboardType="number-pad"
-          style={{ flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }} />
+          style={{ flex: 1, borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }} />
         <TextInput placeholder="Âge max" value={ageMax} onChangeText={setAgeMax} keyboardType="number-pad"
-          style={{ flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }} />
+          style={{ flex: 1, borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }} />
       </View>
       <TextInput placeholder="Distance max (km)" value={distance} onChangeText={setDistance} keyboardType="number-pad"
-        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }} />
-      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
-      <Button title={busy ? '...' : 'Continuer'} onPress={onNext} disabled={busy} />
-    </View>
+        style={{ borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }} />
+      <ErrorText message={error} />
+      <AppButton title="Continuer" onPress={onNext} loading={busy} />
+    </SafeAreaView>
   );
 }
