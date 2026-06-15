@@ -7,10 +7,10 @@ type Props = { all: Interest[]; selectedIds: string[]; onChange: (ids: string[])
 
 export function InterestSelector({ all, selectedIds, onChange }: Props) {
   function toggle(id: string) {
-    if (!canAddInterest(selectedIds.length)) return;
     if (selectedIds.includes(id)) {
+      // La désélection est toujours possible, même au plafond (pour pouvoir échanger un intérêt).
       onChange(selectedIds.filter((x) => x !== id));
-    } else {
+    } else if (canAddInterest(selectedIds.length)) {
       onChange([...selectedIds, id]);
     }
   }
