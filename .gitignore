@@ -48,3 +48,6 @@ google-service-account*.json
 
 # Données de session / worktrees de l'agent — ne jamais committer
 .claude/
+
+# Config Firebase Android (dépôt public) — ne pas exposer
+google-services.json
