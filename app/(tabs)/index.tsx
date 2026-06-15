@@ -1,10 +1,12 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Button, Text, View } from 'react-native';
 import { Swiper, type SwiperCardRefType } from 'rn-swiper-list';
+import { useQueryClient } from '@tanstack/react-query';
 import { useDeck, useLikesRemaining, useRewind, useSwipe } from '../../src/features/deck/use-deck';
 import { DeckCard } from '../../src/features/deck/DeckCard';
 import { clampRemaining } from '../../src/features/deck/deck-format';
 import type { DeckCandidate } from '../../src/features/deck/deck-api';
+import { MatchModal } from '../../src/features/matches/MatchModal';
 
 export default function Deck() {
   const ref = useRef<SwiperCardRefType>(null);
@@ -13,12 +15,20 @@ export default function Deck() {
   const remaining = clampRemaining(remainingRaw);
   const swipe = useSwipe();
   const rewind = useRewind();
+  const qc = useQueryClient();
+  const [matchId, setMatchId] = useState<string | null>(null);
 
   function onSwiped(direction: 'like' | 'pass', index: number) {
     if (!candidates) return;
     swipe.mutate(
       { target: candidates[index].id, direction },
       {
+        onSuccess: (res) => {
+          if (res.matched && res.matchId) {
+            qc.invalidateQueries({ queryKey: ['matches'] });
+            setMatchId(res.matchId);
+          }
+        },
         onError: (e: any) => {
           if (typeof e?.message === 'string' && e.message.includes('QUOTA_EXCEEDED')) {
             Alert.alert('Quota atteint', 'Tu as utilisé tes 20 likes du jour. Reviens demain !');
@@ -84,6 +94,7 @@ export default function Deck() {
           onSwipeLeft={(i: number) => onSwiped('pass', i)}
         />
       </View>
+      {matchId ? <MatchModal matchId={matchId} onClose={() => setMatchId(null)} /> : null}
     </View>
   );
 }

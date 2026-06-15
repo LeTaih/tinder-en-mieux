@@ -17,10 +17,16 @@ export async function fetchDeck(limit = 10, offset = 0): Promise<DeckCandidate[]
   return data?.candidates ?? [];
 }
 
-export async function recordSwipe(target: string, direction: 'like' | 'pass'): Promise<number> {
+export type SwipeResult = { likesRemaining: number; matched: boolean; matchId: string | null };
+
+export async function recordSwipe(target: string, direction: 'like' | 'pass'): Promise<SwipeResult> {
   const { data, error } = await supabase.rpc('record_swipe', { p_target: target, p_direction: direction });
   if (error) throw error;
-  return (data as number) ?? 0;
+  return {
+    likesRemaining: data?.likes_remaining ?? 0,
+    matched: data?.matched ?? false,
+    matchId: data?.match_id ?? null,
+  };
 }
 
 export async function rewindLastSwipe(): Promise<string | null> {
