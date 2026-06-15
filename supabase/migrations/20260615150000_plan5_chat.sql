@@ -13,6 +13,8 @@ create table public.messages (
     (body is not null and image_path is null) or
     (body is null and image_path is not null)
   )
+  ,
+  constraint messages_body_len check (body is null or length(body) <= 2000)
 );
 create index messages_match_created_idx on public.messages (match_id, created_at);
 
@@ -61,6 +63,9 @@ begin
   if p_body is not null and length(btrim(p_body)) = 0 then
     raise exception 'EMPTY_MESSAGE';
   end if;
+  if p_body is not null and length(p_body) > 2000 then
+    raise exception 'MESSAGE_TOO_LONG';
+  end if;
 
   -- Une image doit vivre dans le dossier du match.
   if p_image_path is not null and split_part(p_image_path, '/', 1) <> p_match_id::text then
@@ -91,8 +96,8 @@ revoke execute on function public.send_message(uuid, text, text) from public;
 grant execute on function public.send_message(uuid, text, text) to authenticated;
 
 -- ============ Storage : bucket privé chat-media + policies par participation ============
-insert into storage.buckets (id, name, public)
-values ('chat-media', 'chat-media', false)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('chat-media', 'chat-media', false, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
 on conflict (id) do nothing;
 
 create policy "chat-media: select participant" on storage.objects
