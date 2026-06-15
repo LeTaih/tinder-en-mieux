@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Alert, Button, Platform, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Text, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -10,6 +11,9 @@ import {
   signInWithAppleIdToken,
   signInWithGoogleIdToken,
 } from '../../src/features/auth/auth-api';
+import { AppButton } from '../../src/components/AppButton';
+import { ErrorText } from '../../src/components/ErrorText';
+import { Colors, Radii, Spacing } from '../../src/lib/theme';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -66,7 +70,7 @@ export default function SignIn() {
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 12 }}>
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: Spacing.xxl, gap: Spacing.md }}>
       <Text style={{ fontSize: 24, fontWeight: '700' }}>Connexion</Text>
       <TextInput
         placeholder="E-mail"
@@ -74,18 +78,18 @@ export default function SignIn() {
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
-        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }}
+        style={{ borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }}
       />
-      {errors.email ? <Text style={{ color: 'red' }}>{errors.email}</Text> : null}
+      <ErrorText message={errors.email} />
       <TextInput
         placeholder="Mot de passe"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 }}
+        style={{ borderWidth: 1, borderColor: Colors.border, borderRadius: Radii.sm, padding: Spacing.md }}
       />
-      {errors.password ? <Text style={{ color: 'red' }}>{errors.password}</Text> : null}
-      <Button title={busy ? '...' : 'Se connecter'} onPress={onEmailSubmit} disabled={busy} />
+      <ErrorText message={errors.password} />
+      <AppButton title="Se connecter" onPress={onEmailSubmit} loading={busy} />
 
       {Platform.OS === 'ios' ? (
         <AppleAuthentication.AppleAuthenticationButton
@@ -97,9 +101,9 @@ export default function SignIn() {
         />
       ) : null}
 
-      <Button title="Continuer avec Google" onPress={onGoogle} />
+      <AppButton title="Continuer avec Google" onPress={onGoogle} variant="secondary" />
 
       <Link href="/sign-up">Pas de compte ? S'inscrire</Link>
-    </View>
+    </SafeAreaView>
   );
 }
