@@ -39,6 +39,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       genders: {
         Row: {
           id: string
@@ -311,24 +344,6 @@ export type Database = {
           },
         ]
       }
-      blocks: {
-        Row: {
-          blocked_id: string
-          blocker_id: string
-          created_at: string
-        }
-        Insert: {
-          blocked_id: string
-          blocker_id: string
-          created_at?: string
-        }
-        Update: {
-          blocked_id?: string
-          blocker_id?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
       reports: {
         Row: {
           created_at: string
@@ -351,7 +366,22 @@ export type Database = {
           reported_id?: string
           reporter_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reports_reported_id_fkey"
+            columns: ["reported_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       swipes: {
         Row: {
@@ -420,8 +450,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      block_user: {
-        Args: { p_target: string }
+      block_user: { Args: { p_target: string }; Returns: undefined }
+      call_send_push: {
+        Args: {
+          p_body: string
+          p_data: Json
+          p_title: string
+          p_user_ids: string[]
+        }
         Returns: undefined
       }
       clear_badge: { Args: never; Returns: undefined }
@@ -436,6 +472,7 @@ export type Database = {
           photo_paths: string[]
         }[]
       }
+      increment_badge: { Args: { p_user: string }; Returns: number }
       likes_remaining_today: { Args: never; Returns: number }
       my_matches: {
         Args: { p_user: string }
@@ -448,6 +485,7 @@ export type Database = {
           photo_path: string
         }[]
       }
+      notify_expiring_matches: { Args: never; Returns: undefined }
       record_swipe: {
         Args: { p_direction: string; p_target: string }
         Returns: Json
