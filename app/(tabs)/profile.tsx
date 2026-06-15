@@ -1,5 +1,6 @@
 import { Alert, Image, Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 import { useSession } from '../../src/features/auth/session-provider';
 import { useMyProfile } from '../../src/features/profile/use-profile';
 import { signedPhotoUrl } from '../../src/features/profile/signed-url';
@@ -9,6 +10,7 @@ import { AppButton } from '../../src/components/AppButton';
 import { Colors, FontSizes, Radii, Spacing } from '../../src/lib/theme';
 
 export default function Profile() {
+  const router = useRouter();
   const { session } = useSession();
   const { data } = useMyProfile(session?.user.id);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -40,6 +42,7 @@ export default function Profile() {
       <Text style={{ fontSize: FontSizes.xl, fontWeight: '700' }}>{data?.profile?.display_name ?? 'Profil'}</Text>
       {!photoUrl ? <Text style={{ color: Colors.textMuted, textAlign: 'center' }}>Ajoute une photo à ton profil.</Text> : null}
       {data?.profile?.bio ? <Text style={{ textAlign: 'center' }}>{data.profile.bio}</Text> : null}
+      <AppButton title="Éditer mon profil" onPress={() => router.push('/profile-edit')} />
       <AppButton title="Se déconnecter" onPress={onSignOut} variant="secondary" />
     </View>
   );
