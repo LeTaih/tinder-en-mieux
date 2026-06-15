@@ -53,7 +53,8 @@
         {
           "locationWhenInUsePermission": "On utilise ta position pour te proposer des profils proches."
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
