@@ -67,6 +67,7 @@ export default function Deck() {
           ref={ref}
           data={candidates}
           disableRightSwipe={remaining <= 0}
+          cardStyle={{ width: '100%', height: '100%' }}
           renderCard={(item: DeckCandidate) => (
             <DeckCard
               candidate={item}
