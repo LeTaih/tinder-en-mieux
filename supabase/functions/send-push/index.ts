@@ -10,7 +10,9 @@ Deno.serve(async (req) => {
     return new Response('Forbidden', { status: 403 });
   }
 
-  const { user_ids, title, body, data } = await req.json();
+  // Corps malformé/vide -> dégrade proprement en { sent: 0 } (pas de 500).
+  const payload = await req.json().catch(() => ({}));
+  const { user_ids, title, body, data } = payload;
   if (!Array.isArray(user_ids) || user_ids.length === 0) {
     return new Response(JSON.stringify({ sent: 0 }), { headers: { 'Content-Type': 'application/json' } });
   }
