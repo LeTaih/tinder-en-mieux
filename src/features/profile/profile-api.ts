@@ -57,7 +57,7 @@ export type MyProfileData = {
     birthdate: string | null;
     gender_id: string | null;
     bio: string | null;
-    location: string | null;
+    location: unknown;
   } | null;
   photos: { id: string; storage_path: string; position: number }[];
   preferences: { age_min: number; age_max: number; max_distance_km: number } | null;

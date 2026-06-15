@@ -3,7 +3,7 @@ export type CompletenessInput = {
     display_name: string | null;
     birthdate: string | null;
     gender_id: string | null;
-    location: string | null;
+    location: unknown;
   } | null;
   photosCount: number;
   preferences: { age_min: number; age_max: number; max_distance_km: number } | null;

@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import Identity from './identity';
+import Identity from '../../../app/(onboarding)/identity';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
-jest.mock('../../src/features/auth/session-provider', () => ({
+jest.mock('../auth/session-provider', () => ({
   useSession: () => ({ session: { user: { id: 'u1' } }, loading: false }),
 }));
 

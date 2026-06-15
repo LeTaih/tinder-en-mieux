@@ -1,16 +1,16 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import Preferences from './preferences';
+import Preferences from '../../../app/(onboarding)/preferences';
 
 const mockPush = jest.fn();
 const mockUpsert = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
-jest.mock('../../src/features/auth/session-provider', () => ({
+jest.mock('../auth/session-provider', () => ({
   useSession: () => ({ session: { user: { id: 'u1' } }, loading: false }),
 }));
-jest.mock('../../src/features/profile/use-profile', () => ({
+jest.mock('./use-profile', () => ({
   useGenders: () => ({ data: [] }),
 }));
-jest.mock('../../src/features/profile/profile-api', () => ({
+jest.mock('./profile-api', () => ({
   upsertPreferences: (...args: unknown[]) => mockUpsert(...args),
 }));
 
