@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 type Props = {
@@ -30,10 +30,12 @@ export function ChatInput({ disabled, onSendText, onSendImage }: Props) {
     onSendImage(result.assets[0].uri);
   }
 
+  const canSend = !disabled && text.trim().length > 0;
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8 }}>
       <Pressable onPress={pickImage} disabled={disabled} hitSlop={8}>
-        <TextInput pointerEvents="none" editable={false} value="📎" style={{ fontSize: 22, width: 28 }} />
+        <Text style={{ fontSize: 22 }}>📎</Text>
       </Pressable>
       <TextInput
         style={{
@@ -53,16 +55,16 @@ export function ChatInput({ disabled, onSendText, onSendImage }: Props) {
       />
       <Pressable
         onPress={submitText}
-        disabled={disabled || text.trim().length === 0}
+        disabled={!canSend}
         style={{
           backgroundColor: '#208AEF',
-          opacity: disabled || text.trim().length === 0 ? 0.4 : 1,
+          opacity: canSend ? 1 : 0.4,
           paddingHorizontal: 16,
           paddingVertical: 10,
           borderRadius: 20,
         }}
       >
-        <TextInput pointerEvents="none" editable={false} value="➤" style={{ color: 'white' }} />
+        <Text style={{ color: 'white', fontSize: 18 }}>➤</Text>
       </Pressable>
     </View>
   );
