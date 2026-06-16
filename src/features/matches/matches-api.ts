@@ -9,6 +9,7 @@ export type Match = {
   photos: string[];
   expires_at: string;
   is_active: boolean;
+  location_label: string | null;
 } & RichProfileFields;
 
 export async function fetchMatches(): Promise<Match[]> {

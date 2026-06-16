@@ -8,6 +8,7 @@ export type DeckCandidate = {
   distance_km: number;
   bio: string | null;
   photos: string[];
+  location_label: string | null;
 } & RichProfileFields;
 
 export async function fetchDeck(limit = 10, offset = 0): Promise<DeckCandidate[]> {

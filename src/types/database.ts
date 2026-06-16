@@ -379,6 +379,7 @@ export type Database = {
           id: string
           job: string | null
           location: unknown
+          location_label: string | null
           updated_at: string
         }
         Insert: {
@@ -392,6 +393,7 @@ export type Database = {
           id: string
           job?: string | null
           location?: unknown
+          location_label?: string | null
           updated_at?: string
         }
         Update: {
@@ -405,6 +407,7 @@ export type Database = {
           id?: string
           job?: string | null
           location?: unknown
+          location_label?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -599,12 +602,14 @@ export type Database = {
           id: string
           interests: string[]
           job: string
+          location_label: string
           photo_paths: string[]
           prompts: Json
         }[]
       }
       increment_badge: { Args: { p_user: string }; Returns: number }
       likes_remaining_today: { Args: never; Returns: number }
+      location_drift_km: { Args: { lat: number; lng: number }; Returns: number }
       my_matches: {
         Args: { p_user: string }
         Returns: {
@@ -615,6 +620,7 @@ export type Database = {
           interests: string[]
           is_active: boolean
           job: string
+          location_label: string
           match_id: string
           other_id: string
           photo_path: string
@@ -631,6 +637,10 @@ export type Database = {
         Args: { p_reason: string; p_target: string }
         Returns: undefined
       }
+      register_push_token: {
+        Args: { p_platform: string; p_token: string }
+        Returns: undefined
+      }
       rewind_last_swipe: { Args: never; Returns: string }
       send_message: {
         Args: { p_body: string; p_image_path: string; p_match_id: string }
@@ -641,7 +651,7 @@ export type Database = {
         Returns: undefined
       }
       set_my_location: {
-        Args: { lat: number; lng: number }
+        Args: { label?: string; lat: number; lng: number }
         Returns: undefined
       }
       set_my_preferences: {

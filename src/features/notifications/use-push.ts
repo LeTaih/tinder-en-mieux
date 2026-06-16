@@ -34,7 +34,7 @@ export function usePushNotifications(userId: string | undefined) {
       const projectId = Constants.expoConfig?.extra?.eas?.projectId as string | undefined;
       if (!projectId) return;
       const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-      if (!cancelled) await registerPushToken(userId, token, Platform.OS);
+      if (!cancelled) await registerPushToken(token, Platform.OS);
     })();
     return () => {
       cancelled = true;

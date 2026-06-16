@@ -14,6 +14,7 @@ export type ProfileDetailData = {
   height_cm: number | null;
   interests: string[];
   prompts: PromptAnswer[];
+  location_label?: string | null;
 };
 
 function Chip({ label }: { label: string }) {
@@ -27,6 +28,9 @@ function Chip({ label }: { label: string }) {
 export function ProfileDetailModal({ data, onClose }: { data: ProfileDetailData; onClose: () => void }) {
   const facts = [data.job, data.education, data.height_cm ? `${data.height_cm} cm` : null].filter(Boolean) as string[];
   const title = data.age ? `${data.display_name}, ${formatAge(data.age)}` : data.display_name;
+  const locationLine = [data.location_label, data.distance_km > 0 ? formatDistance(data.distance_km) : null]
+    .filter(Boolean)
+    .join(' · ');
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: Colors.white }}>
@@ -40,7 +44,7 @@ export function ProfileDetailModal({ data, onClose }: { data: ProfileDetailData;
             <Image source={{ uri: data.photos[0] }} style={{ width: '100%', height: 380, borderRadius: Radii.lg }} resizeMode="cover" />
           ) : null}
           <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: Colors.text }}>{title}</Text>
-          {data.distance_km > 0 ? <Text style={{ color: Colors.textMuted }}>{formatDistance(data.distance_km)}</Text> : null}
+          {locationLine ? <Text style={{ color: Colors.textMuted }}>📍 {locationLine}</Text> : null}
           {facts.length > 0 ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
               {facts.map((f) => <Chip key={f} label={f} />)}

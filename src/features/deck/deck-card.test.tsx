@@ -4,12 +4,17 @@ import { DeckCard } from './DeckCard';
 // On isole DeckCard : ce test ne couvre pas SafetyMenu (qui importe supabase via ses hooks).
 jest.mock('../safety/SafetyMenu', () => ({ SafetyMenu: () => null }));
 
-const candidate = { id: 'c1', display_name: 'Léa', age: 24, distance_km: 3, bio: 'Salut', photos: ['https://x/p.jpg'], job: null, education: null, height_cm: null, interests: [], prompts: [] };
+const candidate = { id: 'c1', display_name: 'Léa', age: 24, distance_km: 3, bio: 'Salut', photos: ['https://x/p.jpg'], job: null, education: null, height_cm: null, interests: [], prompts: [], location_label: 'Lyon' };
 
-test('affiche prénom, âge et distance', () => {
+test('affiche prénom, âge, ville et distance', () => {
   render(<DeckCard candidate={candidate} likesRemaining={5} onLike={jest.fn()} onPass={jest.fn()} onRewind={jest.fn()} onOpenDetail={jest.fn()} />);
   expect(screen.getByText('Léa, 24 ans')).toBeTruthy();
-  expect(screen.getByText('à 3 km')).toBeTruthy();
+  expect(screen.getByText('📍 Lyon · à 3 km')).toBeTruthy();
+});
+
+test('sans ville, affiche seulement la distance', () => {
+  render(<DeckCard candidate={{ ...candidate, location_label: null }} likesRemaining={5} onLike={jest.fn()} onPass={jest.fn()} onRewind={jest.fn()} onOpenDetail={jest.fn()} />);
+  expect(screen.getByText('📍 à 3 km')).toBeTruthy();
 });
 
 test('like désactivé quand quota épuisé', () => {
