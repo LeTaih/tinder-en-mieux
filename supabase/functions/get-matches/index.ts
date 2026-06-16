@@ -23,6 +23,7 @@ Deno.serve(async (req) => {
     match_id: string; other_id: string; display_name: string;
     photo: string | null; photos: string[]; expires_at: string; is_active: boolean;
     job: string | null; education: string | null; height_cm: number | null; interests: string[]; prompts: unknown;
+    location_label: string | null;
   }>;
   for (const r of rows ?? []) {
     let photo: string | null = null;
@@ -40,7 +41,7 @@ Deno.serve(async (req) => {
       match_id: r.match_id, other_id: r.other_id, display_name: r.display_name,
       photo, photos, expires_at: r.expires_at, is_active: r.is_active,
       job: r.job ?? null, education: r.education ?? null, height_cm: r.height_cm ?? null,
-      interests: r.interests ?? [], prompts: r.prompts ?? [],
+      interests: r.interests ?? [], prompts: r.prompts ?? [], location_label: r.location_label ?? null,
     });
   }
 

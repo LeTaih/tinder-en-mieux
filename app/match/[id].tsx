@@ -130,7 +130,7 @@ export default function ChatScreen() {
           data={{
             display_name: match.display_name, age: 0, distance_km: 0, bio: null, photos: match.photos,
             job: match.job, education: match.education, height_cm: match.height_cm,
-            interests: match.interests, prompts: match.prompts,
+            interests: match.interests, prompts: match.prompts, location_label: match.location_label,
           }}
           onClose={() => setShowProfile(false)}
         />

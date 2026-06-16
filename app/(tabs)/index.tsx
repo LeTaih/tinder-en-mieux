@@ -98,6 +98,7 @@ export default function Deck() {
             display_name: detail.display_name, age: detail.age, distance_km: detail.distance_km,
             bio: detail.bio, photos: detail.photos, job: detail.job, education: detail.education,
             height_cm: detail.height_cm, interests: detail.interests, prompts: detail.prompts,
+            location_label: detail.location_label,
           }}
           onClose={() => setDetail(null)}
         />

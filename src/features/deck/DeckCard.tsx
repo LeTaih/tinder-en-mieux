@@ -57,7 +57,9 @@ export function DeckCard({ candidate, likesRemaining, onLike, onPass, onRewind, 
         <Text style={[{ fontSize: 24, fontWeight: '800', color: Colors.white }, textShadow]}>
           {candidate.display_name}, {formatAge(candidate.age)}
         </Text>
-        <Text style={[{ color: Colors.white }, textShadow]}>{formatDistance(candidate.distance_km)}</Text>
+        <Text style={[{ color: Colors.white }, textShadow]}>
+          📍 {[candidate.location_label, formatDistance(candidate.distance_km)].filter(Boolean).join(' · ')}
+        </Text>
         {candidate.bio ? (
           <Text style={[{ color: Colors.white }, textShadow]} numberOfLines={2}>
             {candidate.bio}

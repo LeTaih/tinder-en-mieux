@@ -46,9 +46,21 @@ export async function upsertPreferences(
   if (error) throw error;
 }
 
-export async function setMyLocation(lng: number, lat: number) {
-  const { error } = await supabase.rpc('set_my_location', { lng, lat });
+export async function setMyLocation(lng: number, lat: number, label?: string | null) {
+  const { error } = await supabase.rpc('set_my_location', {
+    lng,
+    lat,
+    ...(label != null ? { label } : {}),
+  });
   if (error) throw error;
+}
+
+// Distance (km) entre un point et ma position stockée, calculée côté serveur.
+// Ne renvoie jamais mes coordonnées. null si je n'ai pas encore de position.
+export async function locationDriftKm(lng: number, lat: number): Promise<number | null> {
+  const { data, error } = await supabase.rpc('location_drift_km', { lng, lat });
+  if (error) throw error;
+  return (data as number | null) ?? null;
 }
 
 export async function setMyInterests(interestIds: string[]) {
@@ -79,6 +91,7 @@ export type MyProfileData = {
     gender_id: string | null;
     bio: string | null;
     location: unknown;
+    location_label: string | null;
     job: string | null;
     education: string | null;
     height_cm: number | null;
@@ -92,7 +105,7 @@ export type MyProfileData = {
 
 export async function fetchMyProfile(userId: string): Promise<MyProfileData> {
   const [p, ph, pref, pg, pi, ppr] = await Promise.all([
-    supabase.from('profiles').select('display_name, birthdate, gender_id, bio, location, job, education, height_cm').eq('id', userId).maybeSingle(),
+    supabase.from('profiles').select('display_name, birthdate, gender_id, bio, location, location_label, job, education, height_cm').eq('id', userId).maybeSingle(),
     supabase.from('profile_photos').select('id, storage_path, position').eq('profile_id', userId).order('position'),
     supabase.from('preferences').select('age_min, age_max, max_distance_km').eq('profile_id', userId).maybeSingle(),
     supabase.from('preference_genders').select('gender_id').eq('profile_id', userId),

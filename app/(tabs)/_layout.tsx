@@ -1,8 +1,13 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../src/lib/theme';
+import { useSession } from '../../src/features/auth/session-provider';
+import { useLocationCheck } from '../../src/features/profile/use-location-check';
 
 export default function TabsLayout() {
+  const { session } = useSession();
+  useLocationCheck(session?.user.id);
+
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: Colors.primary }}>
       <Tabs.Screen

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useSession } from '../../src/features/auth/session-provider';
 import { useMyProfile } from '../../src/features/profile/use-profile';
+import { useUpdateMyLocation } from '../../src/features/profile/use-location-check';
 import { signedPhotoUrl } from '../../src/features/profile/signed-url';
 import { signOut } from '../../src/features/auth/auth-api';
 import { authErrorMessage } from '../../src/features/auth/errors';
@@ -13,6 +14,7 @@ export default function Profile() {
   const router = useRouter();
   const { session } = useSession();
   const { data } = useMyProfile(session?.user.id);
+  const { update: updateLocation, busy: locationBusy } = useUpdateMyLocation(session?.user.id);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,9 +42,18 @@ export default function Profile() {
         </View>
       )}
       <Text style={{ fontSize: FontSizes.xl, fontWeight: '700' }}>{data?.profile?.display_name ?? 'Profil'}</Text>
+      {data?.profile?.location_label ? (
+        <Text style={{ color: Colors.textMuted }}>📍 {data.profile.location_label}</Text>
+      ) : null}
       {!photoUrl ? <Text style={{ color: Colors.textMuted, textAlign: 'center' }}>Ajoute une photo à ton profil.</Text> : null}
       {data?.profile?.bio ? <Text style={{ textAlign: 'center' }}>{data.profile.bio}</Text> : null}
       <AppButton title="Éditer mon profil" onPress={() => router.push('/profile-edit')} />
+      <AppButton
+        title={data?.profile?.location_label ? 'Mettre à jour ma position' : 'Définir ma position'}
+        onPress={updateLocation}
+        loading={locationBusy}
+        variant="secondary"
+      />
       <AppButton title="Se déconnecter" onPress={onSignOut} variant="secondary" />
     </View>
   );

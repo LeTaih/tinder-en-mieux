@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 import { useSession } from '../../src/features/auth/session-provider';
 import { setMyLocation } from '../../src/features/profile/profile-api';
+import { reverseGeocodeLabel } from '../../src/features/profile/geocode';
 import { authErrorMessage } from '../../src/features/auth/errors';
 import { AppButton } from '../../src/components/AppButton';
 import { Spacing } from '../../src/lib/theme';
@@ -24,7 +25,8 @@ export default function LocationStep() {
         return;
       }
       const pos = await Location.getCurrentPositionAsync({});
-      await setMyLocation(pos.coords.longitude, pos.coords.latitude);
+      const label = await reverseGeocodeLabel(pos.coords.latitude, pos.coords.longitude);
+      await setMyLocation(pos.coords.longitude, pos.coords.latitude, label);
       await queryClient.invalidateQueries({ queryKey: ['my-profile', session.user.id] });
     } catch (e: any) {
       Alert.alert('Localisation', authErrorMessage(e?.message));
